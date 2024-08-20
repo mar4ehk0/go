@@ -1,26 +1,27 @@
 package reader
 
-import	"encoding/json"
-import	"fmt"
-import	"io"
-import	"os"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+)
 
-import	"github.com/fixme_my_friend/hw02_fix_app/types"
+import "github.com/fixme_my_friend/hw02_fix_app/type_list"
 
-
-func ReadJSON(filePath string, limit int) ([]types.Employee, error) {
+func ReadJSON(filePath string, limit int) ([]type_list.Employee, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}
 
-	byte, err := io.ReadAll(f)
+	bytes, err := io.ReadAll(f)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 		return nil, nil
 	}
 
-	var data []types.Employee
+	var data []type_list.Employee
 
 	err = json.Unmarshal(bytes, &data)
 

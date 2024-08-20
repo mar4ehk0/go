@@ -1,10 +1,12 @@
 package printer
 
 import (
-	"github.com/fixme_my_friend/hw02_fix_app/types"
+	"fmt"
+
+	"github.com/fixme_my_friend/hw02_fix_app/type_list"
 )
 
-func PrintStaff(staff types.Employee) {
+func PrintStaff(staff []type_list.Employee) {
 	var str string
 	for i := 0; i < len(staff); i++ {
 		str := fmt.Sprintf("User ID: %d; Age: %d; Name: %s; Department ID: %d; ", staff[i].UserID, staff[i].Age, staff[i].Name, staff[i].DepartmentID)

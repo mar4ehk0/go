@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/fixme_my_friend/hw02_fix_app/typelist"
 )
 
-import "github.com/fixme_my_friend/hw02_fix_app/type_list"
-
-func ReadJSON(filePath string, limit int) ([]type_list.Employee, error) {
+func ReadJSON(filePath string) ([]typelist.Employee, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
@@ -21,11 +21,9 @@ func ReadJSON(filePath string, limit int) ([]type_list.Employee, error) {
 		return nil, nil
 	}
 
-	var data []type_list.Employee
+	var data []typelist.Employee
 
 	err = json.Unmarshal(bytes, &data)
 
-	res := data
-
-	return res, nil
+	return data, err
 }

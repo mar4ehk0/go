@@ -5,7 +5,7 @@ import (
 
 	"github.com/fixme_my_friend/hw02_fix_app/printer"
 	"github.com/fixme_my_friend/hw02_fix_app/reader"
-	"github.com/fixme_my_friend/hw02_fix_app/type_list"
+	"github.com/fixme_my_friend/hw02_fix_app/typelist"
 )
 
 func main() {
@@ -15,15 +15,16 @@ func main() {
 	fmt.Scanln(&path)
 
 	var err error
-	var staff []type_list.Employee
+	var staff []typelist.Employee
 
 	if len(path) == 0 {
 		path = "data.json"
 	}
 
-	staff, err = reader.ReadJSON(path, -1)
-
-	fmt.Print(err)
+	staff, err = reader.ReadJSON(path)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
 
 	printer.PrintStaff(staff)
 }

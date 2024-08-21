@@ -6,19 +6,20 @@ import (
 	"io"
 	"os"
 
-	"github.com/fixme_my_friend/hw02_fix_app/typelist"
+	"github.com/mar4ehk0/go/hw02_fix_app/typelist"
 )
 
 func ReadJSON(filePath string) ([]typelist.Employee, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
+		return nil, err
 	}
 
 	bytes, err := io.ReadAll(f)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
-		return nil, nil
+		return nil, err
 	}
 
 	var data []typelist.Employee

@@ -3,7 +3,7 @@ package printer
 import (
 	"fmt"
 
-	"github.com/fixme_my_friend/hw02_fix_app/typelist"
+	"github.com/mar4ehk0/go/hw02_fix_app/typelist"
 )
 
 func PrintStaff(staff []typelist.Employee) {

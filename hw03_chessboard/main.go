@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/mar4ehk0/go/hw03_chessboard/validator"
 	"github.com/mar4ehk0/go/hw03_chessboard/view"
@@ -24,11 +25,11 @@ func main() {
 	fmt.Print("width: ")
 	fmt.Scanln(&width)
 
-	if !validator.ValidateHeightChessboard(height) {
+	if !validator.Validate(height) {
 		height = ChessboardDefaultHeight
 	}
 
-	if !validator.ValidateWidthChessboard(width) {
+	if !validator.Validate(width) {
 		width = ChessboardDefaultWidth
 	}
 
@@ -37,14 +38,14 @@ func main() {
 	view.PrintChessboard(chessboard)
 }
 
-func createChessboard(height int, width int) [][]string {
+func createChessboard(height int, width int) []string {
 	rowEven := createEvenRow(width)
 	rowOdd := createOddRow(width)
 
-	chessboard := make([][]string, height)
+	chessboard := make([]string, height)
 
 	for i := range chessboard {
-		var row []string
+		var row string
 		if i%2 == 0 {
 			row = rowEven
 		} else {
@@ -56,16 +57,17 @@ func createChessboard(height int, width int) [][]string {
 	return chessboard
 }
 
-func createEvenRow(width int) []string {
+func createEvenRow(width int) string {
 	return createRow(width, 1)
 }
 
-func createOddRow(width int) []string {
+func createOddRow(width int) string {
 	return createRow(width, 0)
 }
 
-func createRow(width int, isEven int) []string {
-	row := make([]string, width)
+func createRow(width int, isEven int) string {
+	rowBuilder := &strings.Builder{}
+
 	for i := 0; i < width; i++ {
 		var ceil string
 		if i%2 == isEven {
@@ -74,8 +76,8 @@ func createRow(width int, isEven int) []string {
 			ceil = WhiteCeil
 		}
 
-		row[i] = ceil
+		rowBuilder.WriteString(ceil)
 	}
 
-	return row
+	return rowBuilder.String()
 }

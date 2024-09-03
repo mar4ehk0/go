@@ -38,32 +38,44 @@ func main() {
 }
 
 func createChessboard(height int, width int) [][]string {
-	var ceil string
-	var prevCeil string
+	rowEven := createEvenRow(width)
+	rowOdd := createOddRow(width)
 
 	chessboard := make([][]string, height)
 
 	for i := range chessboard {
-		chessboard[i] = make([]string, width)
-	}
-
-	for i := 0; i < height; i++ {
-		for j := 0; j < width; j++ {
-			changeColorCeil(prevCeil, &ceil)
-
-			chessboard[i][j] = ceil
-			prevCeil = ceil
+		var row []string
+		if i%2 == 0 {
+			row = rowEven
+		} else {
+			row = rowOdd
 		}
-		changeColorCeil(prevCeil, &prevCeil)
+		chessboard[i] = row
 	}
 
 	return chessboard
 }
 
-func changeColorCeil(value string, subject *string) {
-	if value == BlackCeil {
-		*subject = WhiteCeil
-	} else {
-		*subject = BlackCeil
+func createEvenRow(width int) []string {
+	return createRow(width, 1)
+}
+
+func createOddRow(width int) []string {
+	return createRow(width, 0)
+}
+
+func createRow(width int, isEven int) []string {
+	row := make([]string, width)
+	for i := 0; i < width; i++ {
+		var ceil string
+		if i%2 == isEven {
+			ceil = BlackCeil
+		} else {
+			ceil = WhiteCeil
+		}
+
+		row[i] = ceil
 	}
+
+	return row
 }

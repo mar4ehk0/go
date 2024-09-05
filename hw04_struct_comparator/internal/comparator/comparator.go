@@ -1,8 +1,6 @@
 package comparator
 
 import (
-	"errors"
-
 	"github.com/mar4ehk0/go/hw04_struct_comparator/internal/book"
 )
 
@@ -16,15 +14,15 @@ func NewComparator(mode ModeEnum) Comparator {
 	return comparator
 }
 
-func (c Comparator) Compare(a book.Book, b book.Book) (bool, error) {
+func (c Comparator) Compare(a book.Book, b book.Book) bool {
 	switch c.mode {
 	case Year:
-		return a.GetYear() >= b.GetYear(), nil
+		return a.GetYear() >= b.GetYear()
 	case Size:
-		return a.GetSize() >= b.GetSize(), nil
+		return a.GetSize() >= b.GetSize()
 	case Rate:
-		return a.GetRate() >= b.GetRate(), nil
+		return a.GetRate() >= b.GetRate()
 	default:
-		return false, errors.New("unknown mode")
+		return false
 	}
 }

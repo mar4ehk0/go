@@ -17,6 +17,6 @@ func (m ModeEnum) String() string {
 	case Rate:
 		return "rate"
 	default:
-		return "unknow"
+		return "unknown"
 	}
 }

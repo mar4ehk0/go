@@ -43,36 +43,3 @@ func main() {
 
 	checker.Check(checkerYear, checkerSize, checkerRate)
 }
-
-// func exampleComparatorYear(a book.Book, b book.Book) {
-// 	cmp := comparator.NewComparator(comparator.Year)
-// 	result := cmp.Compare(a, b)
-
-// 	if result {
-// 		fmt.Printf("Year of book: \"%s\" bigger then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	} else {
-// 		fmt.Printf("Year of book: \"%s\" smaller then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	}
-// }
-
-// func exampleComparatorSize(a book.Book, b book.Book) {
-// 	cmp := comparator.NewComparator(comparator.Size)
-// 	result := cmp.Compare(a, b)
-
-// 	if result {
-// 		fmt.Printf("Size of book: \"%s\" bigger then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	} else {
-// 		fmt.Printf("Size of book: \"%s\" smaller then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	}
-// }
-
-// func exampleComparatorRate(a book.Book, b book.Book) {
-// 	cmp := comparator.NewComparator(comparator.Rate)
-// 	result := cmp.Compare(a, b)
-
-// 	if result {
-// 		fmt.Printf("Rate of book: \"%s\" bigger then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	} else {
-// 		fmt.Printf("Rate of book: \"%s\" smaller then book: \"%s\" \n", a.GetTitle(), b.GetTitle())
-// 	}
-// }

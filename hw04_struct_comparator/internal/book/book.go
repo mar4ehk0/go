@@ -1,12 +1,12 @@
 package book
 
 type Book struct {
-	ID     uint
-	Title  string
-	Author string
-	Year   uint
-	Size   uint
-	Rate   float32
+	id     uint
+	title  string
+	author string
+	year   uint
+	size   uint
+	rate   float32
 }
 
 func CreateBook(id uint, title string, author string, year uint, size uint, rate float32) Book {
@@ -22,49 +22,49 @@ func CreateBook(id uint, title string, author string, year uint, size uint, rate
 }
 
 func (b *Book) SetID(id uint) {
-	b.ID = id
+	b.id = id
 }
 
-func (b *Book) GetID() uint {
-	return b.ID
+func (b *Book) ID() uint {
+	return b.id
 }
 
 func (b *Book) SetTitle(title string) {
-	b.Title = title
+	b.title = title
 }
 
-func (b *Book) GetTitle() string {
-	return b.Title
+func (b *Book) Title() string {
+	return b.title
 }
 
 func (b *Book) SetAuthor(title string) {
-	b.Author = title
+	b.author = title
 }
 
-func (b *Book) GetAuthor() string {
-	return b.Author
+func (b *Book) Author() string {
+	return b.author
 }
 
 func (b *Book) SetYear(year uint) {
-	b.Year = year
+	b.year = year
 }
 
-func (b *Book) GetYear() uint {
-	return b.Year
+func (b *Book) Year() uint {
+	return b.year
 }
 
 func (b *Book) SetSize(size uint) {
-	b.Size = size
+	b.size = size
 }
 
-func (b *Book) GetSize() uint {
-	return b.Size
+func (b *Book) Size() uint {
+	return b.size
 }
 
 func (b *Book) SetRate(rate float32) {
-	b.Rate = rate
+	b.rate = rate
 }
 
-func (b *Book) GetRate() float32 {
-	return b.Rate
+func (b *Book) Rate() float32 {
+	return b.rate
 }

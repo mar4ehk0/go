@@ -8,27 +8,29 @@ import (
 )
 
 type Dto struct {
-	Mode  comparator.ModeEnum
-	BookA book.Book
-	BookB book.Book
+	mode  comparator.ModeEnum
+	bookA book.Book
+	bookB book.Book
 }
 
-func Check(collection ...Dto) {
-	for _, dto := range collection {
-		cmp := comparator.NewComparator(dto.Mode)
-		bookA := dto.BookA
-		bookB := dto.BookB
+func NewDto(mode comparator.ModeEnum, bookA book.Book, bookB book.Book) Dto {
+	return Dto{mode: mode, bookA: bookA, bookB: bookB}
+}
 
-		result := cmp.Compare(bookA, bookB)
+func Check(dto Dto) {
+	cmp := comparator.NewComparator(dto.mode)
+	bookA := dto.bookA
+	bookB := dto.bookB
 
-		var value string
+	result := cmp.Compare(bookA, bookB)
 
-		if result {
-			value = "bigger"
-		} else {
-			value = "smaller"
-		}
+	var value string
 
-		fmt.Printf("%s of book: \"%s\" %s then book: \"%s\" \n", dto.Mode, bookA.GetTitle(), value, bookB.GetTitle())
+	if result {
+		value = "bigger"
+	} else {
+		value = "smaller"
 	}
+
+	fmt.Printf("%s of book: \"%s\" %s then book: \"%s\" \n", dto.mode, bookA.Title(), value, bookB.Title())
 }

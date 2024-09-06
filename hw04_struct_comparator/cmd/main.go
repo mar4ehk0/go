@@ -25,21 +25,13 @@ func main() {
 		4.0,
 	)
 
-	checkerYear := checker.Dto{
-		Mode:  comparator.Year,
-		BookA: book1,
-		BookB: book2,
+	modes := []comparator.ModeEnum{comparator.Year, comparator.Size, comparator.Rate}
+	for _, mode := range modes {
+		dto := checker.NewDto(
+			mode,
+			book1,
+			book2,
+		)
+		checker.Check(dto)
 	}
-	checkerSize := checker.Dto{
-		Mode:  comparator.Size,
-		BookA: book1,
-		BookB: book2,
-	}
-	checkerRate := checker.Dto{
-		Mode:  comparator.Rate,
-		BookA: book1,
-		BookB: book2,
-	}
-
-	checker.Check(checkerYear, checkerSize, checkerRate)
 }

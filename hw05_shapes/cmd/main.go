@@ -22,7 +22,7 @@ func main() {
 			fmt.Printf("Ошибка: %s\n", err.Error())
 			continue
 		}
-		printDetails(someShape[i])
+		fmt.Println(someShape[i])
 		fmt.Println(value)
 	}
 }
@@ -34,11 +34,4 @@ func calculateArea(s any) (float64, error) {
 	}
 
 	return 0.0, errors.New("переданный объект не является фигурой")
-}
-
-func printDetails(s any) {
-	shape, ok := s.(shape.Shape)
-	if ok {
-		fmt.Println(shape.HumanDetails())
-	}
 }

@@ -19,6 +19,6 @@ func (t *Triangle) Area() float64 {
 	return (t.base * t.height) / 2
 }
 
-func (t *Triangle) HumanDetails() string {
+func (t *Triangle) String() string {
 	return fmt.Sprintf("Треугольник: основание %f, высота %f", t.base, t.height)
 }

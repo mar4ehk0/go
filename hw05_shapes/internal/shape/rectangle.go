@@ -19,6 +19,6 @@ func (r *Rectangle) Area() float64 {
 	return r.width * r.height
 }
 
-func (r *Rectangle) HumanDetails() string {
+func (r *Rectangle) String() string {
 	return fmt.Sprintf("Прямоугольник: ширина %f, высота %f", r.width, r.height)
 }

@@ -1,3 +1,3 @@
-module github.com/fixme_my_friend/hw06_testing
+module github.com/mar4ehk0/go/hw06_testing
 
 go 1.20

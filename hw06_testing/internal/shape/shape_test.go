@@ -43,7 +43,6 @@ func TestCanCalculateArea(t *testing.T) {
 }
 
 func TestFailWhenNotShape(t *testing.T) {
-	// arrange
 	tests := []struct {
 		name     string
 		shape    any
@@ -84,10 +83,8 @@ func TestFailWhenNotShape(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			// act
 			_, err := CalculateArea(tc.shape)
 
-			// assert
 			assert.ErrorIs(t, tc.expected, err)
 		})
 	}

@@ -1,20 +1,24 @@
 package comparator
 
+import "errors"
+
 type ModeEnum int
 
 const (
-	Year ModeEnum = iota
-	Size
-	Rate
+	ComparatorModeYear ModeEnum = iota
+	ComparatorModeSize
+	ComparatorModeRate
 )
+
+var ErrUnknownModeEnum = errors.New("unknown mode")
 
 func (m ModeEnum) String() string {
 	switch m {
-	case Year:
+	case ComparatorModeYear:
 		return "year"
-	case Size:
+	case ComparatorModeSize:
 		return "size"
-	case Rate:
+	case ComparatorModeRate:
 		return "rate"
 	default:
 		return "unknown"

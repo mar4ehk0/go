@@ -107,27 +107,10 @@ func TestCanCheck(t *testing.T) {
 }
 
 func TestFailCheck(t *testing.T) {
-	tests := []struct {
-		name           string
-		bookA          *book.Book
-		bookB          *book.Book
-		comparatorMode ModeEnum
-		expected       error
-	}{
-		{
-			"Unknown mode",
-			book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5),
-			book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5),
-			123,
-			ErrUnknownModeEnum,
-		},
-	}
+	var unknownMode ModeEnum = 123
+	bookA := book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5)
+	bookB := book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5)
+	_, err := Check(unknownMode, bookA, bookB)
 
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			_, err := Check(tc.comparatorMode, tc.bookA, tc.bookB)
-			assert.ErrorIs(t, tc.expected, err)
-		})
-	}
+	assert.ErrorIs(t, ErrUnknownModeEnum, err)
 }

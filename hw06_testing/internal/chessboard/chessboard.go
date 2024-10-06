@@ -11,19 +11,22 @@ type Chessboard struct {
 	board  Board
 }
 
-type rowChessboard []byte
-type Board []rowChessboard
+type (
+	rowChessboard []byte
+	Board         []rowChessboard
+)
 
 const (
 	BlackCeil = 35
 	WhiteCeil = 32
 )
 
-var ErrHeightLessZero = errors.New("height less zero")
-var ErrWidthLessZero = errors.New("width less zero")
+var (
+	ErrHeightLessZero = errors.New("height less zero")
+	ErrWidthLessZero  = errors.New("width less zero")
+)
 
 func NewChessboard(height int, width int) (*Chessboard, error) {
-
 	err := validate(height, width)
 	if err != nil {
 		return nil, err

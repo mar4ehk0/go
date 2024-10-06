@@ -106,7 +106,7 @@ func TestCanCheck(t *testing.T) {
 	}
 }
 
-func TestFailCheck(t *testing.T) {
+func TestFailCheckWhenUnknownMode(t *testing.T) {
 	var unknownMode ModeEnum = 123
 	bookA := book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5)
 	bookB := book.CreateBook(1, "BookA", "Author Book A", 10, 100, 5)

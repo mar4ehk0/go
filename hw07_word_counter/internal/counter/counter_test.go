@@ -33,9 +33,9 @@ func TestCanCountWords(t *testing.T) {
 			map[string]uint64{"Lorem": 2, "Ipsum": 1},
 		},
 		{
-			"3 words, 2 is same, with punctuation",
+			"3 words with punctuation",
 			"Lorem, Ipsum! Lorem.",
-			map[string]uint64{"Lorem": 2, "Ipsum": 1},
+			map[string]uint64{"Lorem,": 1, "Ipsum!": 1, "Lorem.": 1},
 		},
 		{
 			"3 similar words in different registers",

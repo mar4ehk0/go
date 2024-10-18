@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package book;
+
+option go_package="github.com/mar4ehk0/hw09_serialize/pkg/book;book";
+
+message Book {
+  uint32 id = 1;
+  string title = 2;
+  string author = 3;
+  uint32 year = 4;
+  uint32 size = 5;
+  double rate = 6;
+}
+
+message Books {
+  repeated Book items = 1;
+}

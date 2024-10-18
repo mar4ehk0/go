@@ -12,3 +12,7 @@ message Book {
   uint32 size = 5;
   double rate = 6;
 }
+
+message Books {
+  repeated Book items = 1;
+}

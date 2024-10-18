@@ -35,7 +35,6 @@ func (b *Book) MarshalJSON() ([]byte, error) {
 }
 
 func (b *Book) UnmarshalJSON(value []byte) error {
-
 	var buf map[string]interface{}
 
 	err := json.Unmarshal(value, &buf)
@@ -92,23 +91,13 @@ func (b *Book) UnmarshalJSON(value []byte) error {
 }
 
 func convertUint(value any) (uint, error) {
-	float64, ok := value.(float64)
+	valueFloat, ok := value.(float64)
 
 	if !ok {
 		return 0, errors.New("not convert to uint")
 	}
 
-	result := uint(float64)
+	result := uint(valueFloat)
 
 	return result, nil
 }
-
-// func (b *Book) Reset() {
-// 	*b = Book{}
-// }
-
-// func (b *Book) String() string {
-// 	return fmt.Sprintf("Book{id: %d, title: %s, author: %s, year: %d, size: %d, rate: %f}", b.id, b.title, b.author, b.year, b.size, b.rate)
-// }
-
-// func (b *Book) ProtoMessage() {}

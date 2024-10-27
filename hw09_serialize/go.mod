@@ -1,4 +1,4 @@
-module github.com/mar4ehk0/hw09_serialize
+module github.com/mar4ehk0/go/hw09_serialize
 
 go 1.21
 

@@ -11,7 +11,7 @@ func Average(sensorCh <-chan int, averageCh chan<- float64) {
 		counter++
 		acm += float64(v)
 		if counter == limitItems {
-			averageCh <- float64(acm) / float64(limitItems)
+			averageCh <- acm / limitItems
 			acm = 0
 			counter = 0
 		}

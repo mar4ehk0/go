@@ -6,45 +6,46 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCanProcessDataWhenMore10Items(t *testing.T) {
-	dataCh := make(chan int)
-	resultCh := make(chan float64)
+func TestCanAverage(t *testing.T) {
+	sensorCh := make(chan int)
+	averageCh := make(chan float64)
 
 	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	expected := 5.5
 
 	go func() {
 		for _, v := range numbers {
-			dataCh <- v
+			sensorCh <- v
 		}
+
+		close(sensorCh)
 	}()
 
-	go ProcessData(dataCh, resultCh)
+	go Average(sensorCh, averageCh)
 
-	actual := <-resultCh
+	actual := <-averageCh
 
 	assert.Equal(t, expected, actual)
 }
 
-func TestCanProcessDataWhenLess10Items(t *testing.T) {
-	dataCh := make(chan int)
-	resultCh := make(chan float64)
+func TestCanAverageWhenLess10Items(t *testing.T) {
+	sensorCh := make(chan int)
+	averageCh := make(chan float64)
 
 	numbers := []int{1, 2, 3, 4, 5, 6, 7}
-	expected := 4
+	expected := 0.0
 
 	go func() {
 		for _, v := range numbers {
-			dataCh <- v
+			sensorCh <- v
 		}
+
+		close(sensorCh)
 	}()
 
-	go ProcessData(dataCh, resultCh)
+	go Average(sensorCh, averageCh)
 
-	var actual float64
-	go func() {
-		actual = <-resultCh
-	}()
+	actual := <-averageCh
 
-	assert.NotEqual(t, expected, actual)
+	assert.Equal(t, expected, actual)
 }

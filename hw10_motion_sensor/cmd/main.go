@@ -1,53 +1,50 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 
-	"github.com/mar4ehk0/hw10_motion_sensor/internal/calculator"
+	"github.com/mar4ehk0/go/hw10_motion_sensor/internal/calculator"
 	"golang.org/x/exp/rand"
 )
 
-func main() {
-	sensorCh := make(chan int)
-	stopCh := make(chan struct{})
-	dataCh := make(chan int)
-	resultCh := make(chan float64)
+func readSensor(sensorCh chan<- int, timeout <-chan time.Time) {
+	defer close(sensorCh)
 
-	go readSensor(sensorCh, stopCh)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
 
-	go calculator.ProcessData(dataCh, resultCh)
+	// start := time.Now()
+	// done := make(chan bool)
+	// defer close(done)
+	// go func() {
+	// 	<-timeout
+	// 	log.Println("Прошло времени1:", time.Since(start))
+	// 	done <- true
+	// }()
 
-LOOP:
 	for {
+		<-ticker.C
+		data := rand.Intn(100)
 		select {
-		case <-stopCh:
-			fmt.Println("\nStop read from sensor")
-			break LOOP
-		case sensorData := <-sensorCh:
-			fmt.Print(".")
-			dataCh <- sensorData
-		case result := <-resultCh:
-			fmt.Printf("\nAverage %f\n", result)
+		case sensorCh <- data:
+		case <-timeout:
+			return
 		}
 	}
 }
 
-func readSensor(sensorCh chan<- int, stopCh chan<- struct{}) {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
+func main() {
+	sensorCh := make(chan int)
+	averageCh := make(chan float64)
 
-	timeout := time.After(15 * time.Second)
+	timeout := time.After(60 * time.Second)
 
-	for {
-		select {
-		case <-timeout:
-			stopCh <- struct{}{}
+	go readSensor(sensorCh, timeout)
 
-			return
-		case <-ticker.C:
-			data := rand.Intn(100)
-			sensorCh <- data
-		}
+	go calculator.Average(sensorCh, averageCh)
+
+	for x := range averageCh {
+		log.Println("average: ", x)
 	}
 }

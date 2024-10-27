@@ -2,33 +2,18 @@ package calculator
 
 const limitItems = 10
 
-func ProcessData(dataCh <-chan int, resultCh chan<- float64) {
+func Average(sensorCh <-chan int, averageCh chan<- float64) {
+	defer close(averageCh)
 	var counter int
+	var acm float64
 
-	data := make([]int, 0, limitItems)
-
-	for v := range dataCh {
-		data = append(data, v)
+	for v := range sensorCh {
 		counter++
+		acm += float64(v)
 		if counter == limitItems {
-			result := average(data)
-
-			resultCh <- result
-			data = nil
+			averageCh <- float64(acm) / float64(limitItems)
+			acm = 0
 			counter = 0
 		}
 	}
-}
-
-func average(data []int) float64 {
-	var result float64
-	var acm int
-
-	for i := 0; i < len(data); i++ {
-		acm += data[i]
-	}
-
-	result = float64(acm) / float64(len(data))
-
-	return result
 }

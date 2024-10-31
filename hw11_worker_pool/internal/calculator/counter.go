@@ -6,7 +6,7 @@ import (
 )
 
 type Counter struct {
-	Mutex sync.Mutex
+	Mutex sync.RWMutex
 	Value int
 }
 
@@ -18,5 +18,8 @@ func (c *Counter) Inc() {
 }
 
 func (c *Counter) String() string {
+	c.Mutex.RLock()
+	defer c.Mutex.RUnlock()
+
 	return strconv.Itoa(c.Value)
 }

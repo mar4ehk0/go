@@ -10,7 +10,7 @@ import (
 func main() {
 	wg := sync.WaitGroup{}
 
-	counter := calculator.Counter{Mutex: sync.Mutex{}}
+	counter := calculator.Counter{}
 
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)

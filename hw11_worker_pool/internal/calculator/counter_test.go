@@ -8,7 +8,7 @@ import (
 )
 
 func TestCanInc(t *testing.T) {
-	counter := Counter{Mutex: sync.Mutex{}}
+	counter := Counter{}
 	expected := 2
 
 	counter.Inc()
@@ -18,7 +18,7 @@ func TestCanInc(t *testing.T) {
 }
 
 func TestCanIncConcurrent(t *testing.T) {
-	counter := Counter{Mutex: sync.Mutex{}}
+	counter := Counter{}
 	expected := 3
 
 	wg := sync.WaitGroup{}

@@ -1,4 +1,4 @@
-package input_param
+package param
 
 import (
 	"log"
@@ -37,7 +37,6 @@ func GetInputParam() (string, string, string) {
 
 func readEnv() (string, string, string) {
 	err := godotenv.Load()
-
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}

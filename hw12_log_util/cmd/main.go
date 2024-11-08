@@ -6,12 +6,11 @@ import (
 
 	"github.com/mar4ehk0/go/hw12_log_util/internal/analyzer"
 	"github.com/mar4ehk0/go/hw12_log_util/internal/file"
-	"github.com/mar4ehk0/go/hw12_log_util/internal/input_param"
+	"github.com/mar4ehk0/go/hw12_log_util/internal/param"
 )
 
 func main() {
-
-	fileToPath, method, output := input_param.GetInputParam()
+	fileToPath, method, output := param.GetInputParam()
 
 	stat := analyzer.NewStat(method)
 

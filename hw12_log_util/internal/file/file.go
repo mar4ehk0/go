@@ -8,7 +8,6 @@ import (
 )
 
 func ReadFile(pathToFile string, out chan string) error {
-
 	f, err := os.OpenFile(pathToFile, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return err
@@ -28,7 +27,7 @@ func ReadFile(pathToFile string, out chan string) error {
 }
 
 func CreateFile(output string, stat analyzer.Stat) error {
-	f, err := os.OpenFile(output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(output, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}

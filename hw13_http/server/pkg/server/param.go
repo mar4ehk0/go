@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/spf13/pflag"
@@ -18,7 +19,8 @@ func NewAddr() *Addr {
 }
 
 func (a *Addr) Connection() string {
-	addr := a.ip + ":" + strconv.Itoa(int(a.port))
+
+	addr := fmt.Sprintf("%s:%s", a.ip, strconv.Itoa(int(a.port)))
 
 	return addr
 }

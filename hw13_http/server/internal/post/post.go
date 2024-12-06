@@ -2,7 +2,6 @@ package post
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Post struct {
@@ -22,8 +21,6 @@ func NewInMemoryPostRepository() InMemoryPostRepository {
 }
 
 func (r *InMemoryPostRepository) persist(post Post) error {
-	fmt.Println(*r)
-	fmt.Printf("%#v\n", post)
 	for _, v := range *r {
 		if v.Title == post.Title {
 
@@ -32,7 +29,6 @@ func (r *InMemoryPostRepository) persist(post Post) error {
 	}
 	*r = append(*r, post)
 
-	fmt.Println(*r)
 	return nil
 }
 

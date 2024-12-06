@@ -17,10 +17,9 @@ type HttpRequest struct {
 }
 
 var (
-	ErrDomainEmpty          = errors.New("url server empty")
+	ErrUrlEmpty          = errors.New("url server empty")
 	ErrPathEmpty            = errors.New("path server empty")
 	ErrHttpMethodEmpty      = errors.New("http method empty")
-	ErrNotAllowedHttpMethod = errors.New("http method not allowed")
 	ErrWrongHttpBody        = errors.New("body does not allowed for GET method")
 	ErrNotImplMethod        = errors.New("not implemented yet method")
 )
@@ -33,7 +32,7 @@ func NewHttpRequest(param param.InputParam) (*HttpRequest, error) {
 	http := &HttpRequest{}
 
 	if len(param.Url) == 0 {
-		return nil, ErrDomainEmpty
+		return nil, ErrUrlEmpty
 	}
 	if len(param.Path) == 0 {
 		return nil, ErrPathEmpty
@@ -42,7 +41,7 @@ func NewHttpRequest(param param.InputParam) (*HttpRequest, error) {
 		return nil, ErrHttpMethodEmpty
 	}
 	if !(param.Method == HttpGet || param.Method == HttpPost) {
-		return nil, ErrNotAllowedHttpMethod
+		return nil, ErrNotImplMethod
 	}
 
 	if param.Method == HttpGet && len(param.Body) != 0 {

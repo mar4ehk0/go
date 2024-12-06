@@ -14,8 +14,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("%#v\n", httpRequest)
-
 	rsp, err := myHttp.SendRequest(*httpRequest)
 	if err != nil {
 		fmt.Println(err)

@@ -52,8 +52,6 @@ func NewHttpRequest() (*HttpRequest, error) {
 	http.Method = method
 	http.Data = body
 
-	fmt.Println(http)
-
 	return http, nil
 }
 

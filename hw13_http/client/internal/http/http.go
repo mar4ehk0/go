@@ -25,9 +25,6 @@ func SendRequest(request HttpRequest) ([]byte, error) {
 		return nil, ErrNotImplMethod
 	}
 
-	// fmt.Printf("%#v\n", string(processedResp))
-	// fmt.Printf("%#v\n", err)
-
 	return processedResp, err
 }
 

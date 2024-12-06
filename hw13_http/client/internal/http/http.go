@@ -13,7 +13,7 @@ import (
 type HttpRequest struct {
 	Url    string
 	Method string
-	Data   string
+	Body   string
 }
 
 var (
@@ -53,7 +53,7 @@ func NewHttpRequest(param param.InputParam) (*HttpRequest, error) {
 
 	http.Url = url
 	http.Method = param.Method
-	http.Data = param.Body
+	http.Body = param.Body
 
 	return http, nil
 }
@@ -66,7 +66,7 @@ func SendRequest(request HttpRequest) ([]byte, error) {
 	case HttpGet:
 		processedResp, err = get(request.Url)
 	case HttpPost:
-		processedResp, err = post(request.Url, request.Data)
+		processedResp, err = post(request.Url, request.Body)
 	default:
 		return nil, ErrNotImplMethod
 	}

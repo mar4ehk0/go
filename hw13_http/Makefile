@@ -20,7 +20,7 @@ run_server: ## Run server
 client_send_get: ## Client send GET /posts/@TITLE, use TITLE=lorem
 	go run client/cmd/main.go -u="127.0.0.1:8080" -p="posts/${TITLE}" -m="GET" 
 
-client_send_post: ## Client send POST /posts
+client_send_post: ## Client send POST /posts, use TITLE=lorem BODY=body
 	go run client/cmd/main.go -u="127.0.0.1:8080" -p="posts" -m="POST" -b='{"title": "${TITLE}","body": "${BODY}"}'
 
 # Global

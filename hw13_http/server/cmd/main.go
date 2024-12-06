@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/ma4ehk0/go/hw13_http/server/internal/post"
 	"github.com/ma4ehk0/go/hw13_http/server/pkg/server"
@@ -20,8 +21,9 @@ func main() {
 	router := initializeRoutes(handler)
 
 	server := &http.Server{
-		Addr:    addr.Connection(),
-		Handler: router,
+		Addr:              addr.Connection(),
+		Handler:           router,
+		ReadHeaderTimeout: time.Second,
 	}
 	log.Println("Listening...")
 	err := server.ListenAndServe()
@@ -31,7 +33,7 @@ func main() {
 	}
 }
 
-func initializeRoutes(p *post.PostService) http.Handler {
+func initializeRoutes(p *post.Service) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /posts/{title}", p.Read)
 	mux.HandleFunc("POST /posts", p.Create)

@@ -2,20 +2,21 @@ package post
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"os"
 )
 
-type PostService struct {
+type Service struct {
 	repo InMemoryPostRepository
 }
 
-func NewPostService(repo InMemoryPostRepository) *PostService {
-	return &PostService{repo: repo}
+func NewPostService(repo InMemoryPostRepository) *Service {
+	return &Service{repo: repo}
 }
 
-func (p *PostService) Create(w http.ResponseWriter, r *http.Request) {
+func (p *Service) Create(w http.ResponseWriter, r *http.Request) {
 	var post Post
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
@@ -23,7 +24,7 @@ func (p *PostService) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = p.repo.persist(post)
-	if err == ErrAlreadyExist {
+	if errors.Is(err, ErrAlreadyExist) {
 		w.WriteHeader(http.StatusConflict)
 		os.Stdout.Write([]byte("Post already exist.\n"))
 		return
@@ -33,18 +34,23 @@ func (p *PostService) Create(w http.ResponseWriter, r *http.Request) {
 	os.Stdout.Write([]byte("Post created.\n"))
 }
 
-func (p *PostService) Read(w http.ResponseWriter, r *http.Request) {
+func (p *Service) Read(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
 
 	post, err := p.repo.getByTitle(title)
-	if err == ErrPostNotFound {
+	if errors.Is(err, ErrPostNotFound) {
 		w.WriteHeader(http.StatusNotFound)
 		os.Stdout.Write([]byte("Post not found.\n"))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(post)
+	err = json.NewEncoder(w).Encode(post)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		os.Stdout.Write([]byte("Can not marshal post.\n"))
+		return
+	}
 
 	os.Stdout.Write([]byte("Post found.\n"))
 }

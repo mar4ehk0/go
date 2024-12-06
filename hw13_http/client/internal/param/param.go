@@ -5,7 +5,7 @@ import (
 )
 
 type InputParam struct {
-	Url    string
+	URL    string
 	Path   string
 	Method string
 	Body   string
@@ -19,5 +19,5 @@ func ReadFlags() *InputParam {
 
 	pflag.Parse()
 
-	return &InputParam{Url: *url, Path: *path, Method: *method, Body: *body}
+	return &InputParam{URL: *url, Path: *path, Method: *method, Body: *body}
 }

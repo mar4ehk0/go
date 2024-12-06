@@ -20,14 +20,13 @@ func NewInMemoryPostRepository() InMemoryPostRepository {
 	return make(InMemoryPostRepository, 0, 100)
 }
 
-func (r *InMemoryPostRepository) persist(post Post) error {
-	for _, v := range *r {
+func (i *InMemoryPostRepository) persist(post Post) error {
+	for _, v := range *i {
 		if v.Title == post.Title {
-
 			return ErrAlreadyExist
 		}
 	}
-	*r = append(*r, post)
+	*i = append(*i, post)
 
 	return nil
 }
@@ -35,7 +34,6 @@ func (r *InMemoryPostRepository) persist(post Post) error {
 func (i *InMemoryPostRepository) getByTitle(title string) (Post, error) {
 	for _, post := range *i {
 		if post.Title == title {
-
 			return post, nil
 		}
 	}

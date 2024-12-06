@@ -9,7 +9,7 @@ import (
 )
 
 type InputParam struct {
-	Url    string
+	URL    string
 	Path   string
 	Method string
 	Body   string
@@ -18,7 +18,7 @@ type InputParam struct {
 func main() {
 	param := param.ReadFlags()
 
-	httpRequest, err := myHttp.NewHttpRequest(*param)
+	httpRequest, err := myHttp.NewHTTPRequest(*param)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

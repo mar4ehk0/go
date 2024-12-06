@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ma4ehk0/go/hw13_http/server/internal/post"
 	"github.com/ma4ehk0/go/hw13_http/server/pkg/server"
@@ -22,7 +24,11 @@ func main() {
 		Handler: router,
 	}
 	log.Println("Listening...")
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
 func initializeRoutes(p *post.PostService) http.Handler {

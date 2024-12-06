@@ -6,11 +6,57 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/ma4ehk0/go/hw13_http/client/internal/param"
 )
 
+type HttpRequest struct {
+	Url    string
+	Method string
+	Data   string
+}
+
 var (
-	ErrNotImplMethod = errors.New("not implemented yet method")
+	ErrDomainEmpty          = errors.New("url server empty")
+	ErrPathEmpty            = errors.New("path server empty")
+	ErrHttpMethodEmpty      = errors.New("http method empty")
+	ErrNotAllowedHttpMethod = errors.New("http method not allowed")
+	ErrWrongHttpBody        = errors.New("body does not allowed for GET method")
+	ErrNotImplMethod        = errors.New("not implemented yet method")
 )
+
+const HttpGet string = "GET"
+const HttpPost string = "POST"
+
+func NewHttpRequest(param param.InputParam) (*HttpRequest, error) {
+
+	http := &HttpRequest{}
+
+	if len(param.Url) == 0 {
+		return nil, ErrDomainEmpty
+	}
+	if len(param.Path) == 0 {
+		return nil, ErrPathEmpty
+	}
+	if len(param.Method) == 0 {
+		return nil, ErrHttpMethodEmpty
+	}
+	if !(param.Method == HttpGet || param.Method == HttpPost) {
+		return nil, ErrNotAllowedHttpMethod
+	}
+
+	if param.Method == HttpGet && len(param.Body) != 0 {
+		return nil, ErrWrongHttpBody
+	}
+
+	url := fmt.Sprintf("http://%s/%s", param.Url, param.Path)
+
+	http.Url = url
+	http.Method = param.Method
+	http.Data = param.Body
+
+	return http, nil
+}
 
 func SendRequest(request HttpRequest) ([]byte, error) {
 	var processedResp []byte

@@ -5,10 +5,20 @@ import (
 	"os"
 
 	myHttp "github.com/ma4ehk0/go/hw13_http/client/internal/http"
+	"github.com/ma4ehk0/go/hw13_http/client/internal/param"
 )
 
+type InputParam struct {
+	Url    string
+	Path   string
+	Method string
+	Body   string
+}
+
 func main() {
-	httpRequest, err := myHttp.NewHttpRequest()
+	param := param.ReadFlags()
+
+	httpRequest, err := myHttp.NewHttpRequest(*param)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

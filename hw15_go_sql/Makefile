@@ -24,7 +24,7 @@ install-deps: ## Setup install deps
 migration-status: ## Migration status
 	$(PROJECT_BIN)/goose -dir ${MIGRATION_DIR} postgres ${MIGRATION_DSN} status -v
 
-migration-add: ## Create migration
+migration-add: ## Create migration, name=migration_name
 	$(PROJECT_BIN)/goose -dir ${MIGRATION_DIR} create $(name) sql
 
 migration-up: ## Migration up
@@ -33,7 +33,8 @@ migration-up: ## Migration up
 migration-down: ## Migration down
 	$(PROJECT_BIN)/goose -dir ${MIGRATION_DIR} postgres ${MIGRATION_DSN} down -v
 
-
+run_server: ## Run server
+	go run cmd/main.go -p=8080 -i="127.0.0.1"
 
 
 # TITLE ?= lorem

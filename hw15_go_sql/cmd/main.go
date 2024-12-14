@@ -1,24 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/mar4ehk0/go/hw15_go_sql/internal/post"
+	"github.com/joho/godotenv"
+	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/handler"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
+
+	_ "github.com/jackc/pgx/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
 func main() {
+	godotenv.Load()
+
 	addr := server.NewAddr()
 
-	repo := post.NewRepo()
+	db, err := sqlx.Connect("pgx", os.Getenv("APP_DB_DSN"))
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	defer db.Close()
 
-	handler := post.NewPostService(*repo)
+	repoProduct := product.NewRepo(db)
+	serviceProduct := product.NewService(repoProduct)
+	handlerProduct := handler.NewHandler(serviceProduct)
 
-	router := initializeRoutes(handler)
+	router := initializeRoutes(handlerProduct)
 
 	server := &http.Server{
 		Addr:              addr.Connection(),
@@ -26,16 +39,16 @@ func main() {
 		ReadHeaderTimeout: time.Second,
 	}
 	log.Println("Listening...")
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
 
-func initializeRoutes(p *post.Service) http.Handler {
+func initializeRoutes(h *handler.Handler) http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /posts/{title}", p.Read)
-	mux.HandleFunc("POST /posts", p.Create)
+	mux.HandleFunc("POST /products", h.CreateProduct)
+	mux.HandleFunc("GET /products/{id}", h.GetProductById)
 	return mux
 }

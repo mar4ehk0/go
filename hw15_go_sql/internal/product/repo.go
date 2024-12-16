@@ -17,7 +17,7 @@ func NewRepo(db *sqlx.DB) *Repo {
 	return &Repo{db: db}
 }
 
-func (r *Repo) Add(dto CreateDto) (int, error) {
+func (r *Repo) Add(dto Dto) (int, error) {
 	stmt, err := r.db.PrepareNamed("INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id")
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't do prepare query product {%s, %d} error: %w", dto.Name, dto.Price, err)
@@ -28,15 +28,8 @@ func (r *Repo) Add(dto CreateDto) (int, error) {
 	err = stmt.Get(&id, dto)
 
 	if err != nil {
-		if pgErr, ok := err.(pgx.PgError); ok {
-			switch pgErr.Code {
-			case "23505":
-				return 0, db.ErrDBDuplicateKey
-			default:
-				wrappedErr := fmt.Errorf("can't do insert product {%s, %d} error: %w", dto.Name, dto.Price, err)
-				return 0, wrappedErr
-			}
-		}
+		msgErr := fmt.Sprintf("can't do insert product {%s, %d}", dto.Name, dto.Price)
+		err = processError(err, msgErr)
 		return 0, err
 	}
 
@@ -56,4 +49,29 @@ func (r *Repo) GetById(id int) (Product, error) {
 	}
 
 	return product, nil
+}
+
+func (r *Repo) Update(product Product) error {
+	_, err := r.db.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
+	if err != nil {
+		msgErr := fmt.Sprintf("can't do prepare update product {%s, %d}", product.Name, product.Price)
+		err = processError(err, msgErr)
+		return err
+	}
+
+	return nil
+}
+
+func processError(err error, msgError string) error {
+	if pgErr, ok := err.(pgx.PgError); ok {
+		switch pgErr.Code {
+		case "23505":
+			return db.ErrDBDuplicateKey
+		default:
+			wrappedErr := fmt.Errorf("%s error: %w", msgError, err)
+			return wrappedErr
+		}
+	}
+
+	return err
 }

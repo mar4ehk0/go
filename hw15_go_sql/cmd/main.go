@@ -50,5 +50,6 @@ func initializeRoutes(h *handler.Handler) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /products", h.CreateProduct)
 	mux.HandleFunc("GET /products/{id}", h.GetProductById)
+	mux.HandleFunc("PATCH /products/{id}", h.UpdateProductById)
 	return mux
 }

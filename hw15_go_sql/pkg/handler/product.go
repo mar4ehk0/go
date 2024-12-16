@@ -21,7 +21,9 @@ func NewHandler(service *product.Service) *Handler {
 }
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var dto product.CreateDto
+
+	///
+	var dto product.Dto
 	err := json.NewDecoder(r.Body).Decode(&dto)
 	if err != nil {
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -33,6 +35,7 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		os.Stdout.Write([]byte("Can't create product, wrong input data.\n"))
 		return
 	}
+	/// перепишим на валидацию через product.NewDto
 
 	pr, err := h.service.Create(dto)
 	if err != nil {
@@ -88,4 +91,39 @@ func (h *Handler) GetProductById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	server.CreateResponse(w, []byte(data), http.StatusCreated)
+}
+
+func (h *Handler) UpdateProductById(w http.ResponseWriter, r *http.Request) {
+	idRaw := r.PathValue("id")
+
+	id, err := strconv.Atoi(idRaw)
+	if err != nil {
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		return
+	}
+
+	dto, err := product.NewDto(r.Body)
+	if err != nil {
+		if errors.Is(err, product.ErrNotValid) {
+			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
+			os.Stdout.Write([]byte("Can't create product, wrong input data.\n"))
+			return
+		}
+		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	_, err = h.service.Update(id, *dto)
+	if err != nil {
+		if errors.Is(err, db.ErrDBDuplicateKey) {
+			server.CreateResponse(w, []byte("Already exist product with same name"), http.StatusConflict)
+			os.Stdout.Write([]byte("Can't update product.\n"))
+			return
+		}
+
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		os.Stdout.Write([]byte(err.Error() + "\n"))
+	}
+
+	server.CreateResponse(w, []byte(""), http.StatusNoContent)
 }

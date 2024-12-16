@@ -52,11 +52,21 @@ func (r *Repo) GetById(id int) (Product, error) {
 }
 
 func (r *Repo) Update(product Product) error {
-	_, err := r.db.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
+	msgErr := fmt.Sprintf("can't do prepare update product {%s, %d}", product.Name, product.Price)
+
+	result, err := r.db.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
 	if err != nil {
-		msgErr := fmt.Sprintf("can't do prepare update product {%s, %d}", product.Name, product.Price)
 		err = processError(err, msgErr)
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		err = processError(err, msgErr)
+		return err
+	}
+	if rowsAffected == 0 {
+		return db.ErrDBNotFound
 	}
 
 	return nil

@@ -8,7 +8,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
-	"github.com/mar4ehk0/go/hw15_go_sql/pkg/handler"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
 
 	_ "github.com/jackc/pgx/stdlib"
@@ -29,13 +28,14 @@ func main() {
 
 	repoProduct := product.NewRepo(db)
 	serviceProduct := product.NewService(repoProduct)
-	handlerProduct := handler.NewHandler(serviceProduct)
+	handlerProduct := product.NewHandler(serviceProduct)
 
-	router := initializeRoutes(handlerProduct)
+	mux := http.NewServeMux()
+	handlerProduct.InitializeRoutes(mux)
 
 	server := &http.Server{
 		Addr:              addr.Connection(),
-		Handler:           router,
+		Handler:           mux,
 		ReadHeaderTimeout: time.Second,
 	}
 	log.Println("Listening...")
@@ -46,10 +46,10 @@ func main() {
 	}
 }
 
-func initializeRoutes(h *handler.Handler) http.Handler {
-	mux := http.NewServeMux()
-	mux.HandleFunc("POST /products", h.CreateProduct)
-	mux.HandleFunc("GET /products/{id}", h.GetProductById)
-	mux.HandleFunc("PATCH /products/{id}", h.UpdateProductById)
-	return mux
-}
+// func initializeRoutes(p *product.Handler) http.Handler {
+// 	mux := http.NewServeMux()
+// 	mux.HandleFunc("POST /products", p.CreateProduct)
+// 	mux.HandleFunc("GET /products/{id}", p.GetProductById)
+// 	mux.HandleFunc("PATCH /products/{id}", p.UpdateProductById)
+// 	return mux
+// }

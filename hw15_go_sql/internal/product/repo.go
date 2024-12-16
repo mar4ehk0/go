@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/jackc/pgx"
 	"github.com/jmoiron/sqlx"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
@@ -29,7 +28,7 @@ func (r *Repo) Add(dto Dto) (int, error) {
 
 	if err != nil {
 		msgErr := fmt.Sprintf("can't do insert product {%s, %d}", dto.Name, dto.Price)
-		err = processError(err, msgErr)
+		err = db.ProcessError(err, msgErr)
 		return 0, err
 	}
 
@@ -56,13 +55,13 @@ func (r *Repo) Update(product Product) error {
 
 	result, err := r.db.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
 	if err != nil {
-		err = processError(err, msgErr)
+		err = db.ProcessError(err, msgErr)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		err = processError(err, msgErr)
+		err = db.ProcessError(err, msgErr)
 		return err
 	}
 	if rowsAffected == 0 {
@@ -70,18 +69,4 @@ func (r *Repo) Update(product Product) error {
 	}
 
 	return nil
-}
-
-func processError(err error, msgError string) error {
-	if pgErr, ok := err.(pgx.PgError); ok {
-		switch pgErr.Code {
-		case "23505":
-			return db.ErrDBDuplicateKey
-		default:
-			wrappedErr := fmt.Errorf("%s error: %w", msgError, err)
-			return wrappedErr
-		}
-	}
-
-	return err
 }

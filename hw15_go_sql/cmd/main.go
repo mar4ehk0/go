@@ -8,6 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
+	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
 
 	_ "github.com/jackc/pgx/stdlib"
@@ -26,12 +27,18 @@ func main() {
 	}
 	defer db.Close()
 
+	mux := http.NewServeMux()
+
 	repoProduct := product.NewRepo(db)
 	serviceProduct := product.NewService(repoProduct)
 	handlerProduct := product.NewHandler(serviceProduct)
-
-	mux := http.NewServeMux()
 	handlerProduct.InitializeRoutes(mux)
+
+	repoUser := user.NewRepo(db)
+	serviceUser := user.NewService(repoUser)
+	handlerUser := user.NewHandler(serviceUser)
+	handlerUser.InitializeRoutes(mux)
+
 
 	server := &http.Server{
 		Addr:              addr.Connection(),

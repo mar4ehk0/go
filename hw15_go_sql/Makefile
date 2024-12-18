@@ -36,22 +36,8 @@ migration-down: ## Migration down
 run_server: ## Run server
 	go run cmd/main.go -p=8080 -i="127.0.0.1"
 
-
-# TITLE ?= lorem
-# BODY ?= body
-
-# run_server: ## Run server
-# 	go run server/cmd/main.go -p=8080 -i="127.0.0.1"
-
-# client_send_get: ## Client send GET /posts/@TITLE, use TITLE=lorem
-# 	go run client/cmd/main.go -u="127.0.0.1:8080" -p="posts/${TITLE}" -m="GET" 
-
-# client_send_post: ## Client send POST /posts, use TITLE=lorem BODY=body
-# 	go run client/cmd/main.go -u="127.0.0.1:8080" -p="posts" -m="POST" -b='{"title": "${TITLE}","body": "${BODY}"}'
-
-# lint: ## Run linter
-# 	golangci-lint run -c ../.golangci.yml
-
+lint: ## Run linter
+	golangci-lint run -c ../.golangci.yml
 
 # Global
 .DEFAULT_GOAL := help

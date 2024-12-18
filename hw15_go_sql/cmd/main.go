@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/mar4ehk0/go/hw15_go_sql/internal/order"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
@@ -39,6 +40,10 @@ func main() {
 	handlerUser := user.NewHandler(serviceUser)
 	handlerUser.InitializeRoutes(mux)
 
+	repoOrder := order.NewRepo(db)
+	serviceOrder := order.NewService(repoOrder, repoProduct, repoUser)
+	handlerOrder := order.NewHandler(serviceOrder)
+	handlerOrder.InitializeRoutes(mux)
 
 	server := &http.Server{
 		Addr:              addr.Connection(),

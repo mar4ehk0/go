@@ -17,7 +17,7 @@ func NewRepo(db *sqlx.DB) *Repo {
 	return &Repo{db: db}
 }
 
-func (r *Repo) Add(
+func (r *Repo) AddWithTx(
 	tx *sqlx.Tx,
 	user user.User,
 	products []product.Product,
@@ -42,4 +42,14 @@ func (r *Repo) Add(
 	}
 
 	return orderID, nil
+}
+
+func (r *Repo) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
+	var order Order
+	err := tx.QueryRowx("SELECT id, user_id, order_date, total_amount FROM orders WHERE id=$1", id).StructScan(&order)
+	if err != nil {
+		return order, fmt.Errorf("failed to select order: %w", err)
+	}
+
+	return order, nil
 }

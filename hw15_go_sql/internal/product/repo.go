@@ -72,7 +72,7 @@ func (r *Repo) Update(product Product) error {
 	return nil
 }
 
-func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
+func (r *Repo) GetManyWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
 	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsID)
 	if err != nil {
 		return []Product{}, err

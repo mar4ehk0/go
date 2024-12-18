@@ -41,12 +41,12 @@ func (s *Service) Create(dto *CreateDto) (Order, error) {
 		}
 	}()
 
-	user, err := s.repoUser.GetByINWithTx(tx, dto.UserID)
+	user, err := s.repoUser.GetByIDWithTx(tx, dto.UserID)
 	if err != nil {
 		return Order{}, err
 	}
 
-	products, err := s.repoProduct.GetByINWithTx(tx, dto.ProductsID)
+	products, err := s.repoProduct.GetManyWithTx(tx, dto.ProductsID)
 	if err != nil {
 		return Order{}, err
 	}
@@ -62,10 +62,40 @@ func (s *Service) Create(dto *CreateDto) (Order, error) {
 
 	orderDate := time.Now()
 
-	id, err := s.repoOrder.Add(tx, user, products, totalAmount, orderDate)
+	id, err := s.repoOrder.AddWithTx(tx, user, products, totalAmount, orderDate)
 	if err != nil {
 		return Order{}, err
 	}
 
 	return Order{ID: id, UserID: user.ID, OrderDate: orderDate, TotalAmount: totalAmount}, err
+}
+
+func (s *Service) GetByID(id int) (GetDto, error) {
+	tx, err := db.NewTransaction(s.repoOrder.db)
+	if err != nil {
+		return GetDto{}, err
+	}
+	defer func() {
+		var dbErr error
+		if err != nil {
+			dbErr = tx.Rollback()
+		} else {
+			dbErr = tx.Commit()
+		}
+		if dbErr != nil {
+			log.Println(dbErr)
+		}
+	}()
+
+	order, err := s.repoOrder.GetByIDWithTx(tx, id)
+	if err != nil {
+		return GetDto{}, err
+	}
+
+	user, err := s.repoUser.GetByIDWithTx(tx, id)
+	if err != nil {
+		return GetDto{}, err
+	}
+
+	return GetDto{ID: order.ID, User: user, OrderDate: order.OrderDate, TotalAmount: order.TotalAmount}, nil
 }

@@ -36,6 +36,9 @@ migration-down: ## Migration down
 run_server: ## Run server
 	go run cmd/main.go -p=8080 -i="127.0.0.1"
 
+run_db: ## Run DB
+	cd docker && docker-compose up -d
+
 lint: ## Run linter
 	golangci-lint run -c ../.golangci.yml
 

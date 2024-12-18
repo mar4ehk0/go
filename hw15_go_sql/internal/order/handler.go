@@ -5,7 +5,9 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strconv"
 
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
 )
 
@@ -53,5 +55,32 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
+	idRaw := r.PathValue("id")
 
+	id, err := strconv.Atoi(idRaw)
+	if err != nil {
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		return
+	}
+
+	dto, err := h.service.GetByID(id)
+	if err != nil {
+		if errors.Is(err, db.ErrDBNotFound) {
+			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
+			os.Stdout.Write([]byte(err.Error() + "\n"))
+			return
+		}
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		os.Stdout.Write([]byte(err.Error() + "\n"))
+		return
+	}
+
+	data, err := json.Marshal(dto)
+	if err != nil {
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		os.Stdout.Write([]byte(err.Error()))
+		return
+	}
+
+	server.CreateResponse(w, data, http.StatusCreated)
 }

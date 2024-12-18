@@ -26,7 +26,7 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	dto, err := NewCreateDto(r.Body)
+	dto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
@@ -50,7 +50,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(map[string]int{"id": user.ID})
+	data, err := NewResponseCreateDto(user)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))

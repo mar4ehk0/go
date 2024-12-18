@@ -14,7 +14,7 @@ func NewService(repo *Repo) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Create(dto *CreateDto) (User, error) {
+func (s *Service) Create(dto *EntryCreateDto) (User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), 14)
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't hashed password error: %w", err)

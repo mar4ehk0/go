@@ -26,7 +26,6 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-
 	///
 	var dto Dto
 	err := json.NewDecoder(r.Body).Decode(&dto)
@@ -56,7 +55,6 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data, err := json.Marshal(map[string]int{"id": pr.Id})
-
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
@@ -88,7 +86,6 @@ func (h *Handler) GetProductById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data, err := json.Marshal(product)
-
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))

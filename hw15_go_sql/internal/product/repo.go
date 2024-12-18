@@ -25,7 +25,6 @@ func (r *Repo) Add(dto Dto) (int, error) {
 
 	var id int
 	err = stmt.Get(&id, dto)
-
 	if err != nil {
 		msgErr := fmt.Sprintf("can't do insert product {%s, %d}", dto.Name, dto.Price)
 		err = db.ProcessError(err, msgErr)
@@ -82,7 +81,6 @@ func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsId []int) ([]Product, error) {
 	products := []Product{}
 
 	rows, err := tx.Queryx(query, args...)
-
 	if err != nil {
 		return []Product{}, err
 	}

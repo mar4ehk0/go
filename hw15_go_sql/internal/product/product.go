@@ -1,7 +1,7 @@
 package product
 
 type Product struct {
-	Id    int    `json:"id"`
-	Name  string `json:"name"`
-	Price int    `json:"price"`
+	Id    int    `json:"id"`    //nolint:structtag
+	Name  string `json:"name"`  //nolint:structtag
+	Price int    `json:"price"` //nolint:structtag
 }

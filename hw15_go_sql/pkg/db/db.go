@@ -8,11 +8,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-var ErrDBDuplicateKey = errors.New("duplicate key")
-var ErrDBNotFound = errors.New("not found")
+var (
+	ErrDBDuplicateKey = errors.New("duplicate key")
+	ErrDBNotFound     = errors.New("not found")
+)
 
 func ProcessError(err error, msgError string) error {
-	if pgErr, ok := err.(pgx.PgError); ok {
+	pgErr, ok := err.(pgx.PgError)
+
+	if ok {
 		switch pgErr.Code {
 		case "23505":
 			return ErrDBDuplicateKey

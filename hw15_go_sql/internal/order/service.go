@@ -2,6 +2,7 @@ package order
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
@@ -29,10 +30,14 @@ func (s *Service) Create(dto *CreateDto) (Order, error) {
 		return Order{}, err
 	}
 	defer func() {
+		var dbErr error
 		if err != nil {
-			tx.Rollback()
+			dbErr = tx.Rollback()
 		} else {
-			tx.Commit()
+			dbErr = tx.Commit()
+		}
+		if dbErr != nil {
+			log.Println(dbErr)
 		}
 	}()
 

@@ -51,7 +51,6 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data, err := json.Marshal(map[string]int{"id": user.Id})
-
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
@@ -83,7 +82,6 @@ func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data, err := json.Marshal(user)
-
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))

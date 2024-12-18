@@ -25,7 +25,6 @@ func (r *Repo) Add(dto *CreateDto) (int, error) {
 
 	var id int
 	err = stmt.Get(&id, dto)
-
 	if err != nil {
 		msgErr := fmt.Sprintf("can't do insert user {%s, %s, %s}", dto.Name, dto.Email, dto.Password)
 		err = db.ProcessError(err, msgErr)

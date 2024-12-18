@@ -47,3 +47,15 @@ func NewResponseCreateDto(user User) ([]byte, error) {
 	data, err := json.Marshal(dto)
 	return data, err
 }
+
+type ResponseReadDto struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+func NewResponseReadDto(user User) ([]byte, error) {
+	dto := &ResponseReadDto{ID: user.ID, Name: user.Name, Email: user.Email}
+	data, err := json.Marshal(dto)
+	return data, err
+}

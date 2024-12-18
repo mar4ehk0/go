@@ -74,3 +74,16 @@ func (r *Repo) Update(id int, dto *UpdateDto) error {
 
 	return nil
 }
+
+func (r *Repo) GetByINWithTx(tx *sqlx.Tx, id int) (User, error) {
+	var user User
+	err := tx.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1;", id).StructScan(&user)
+	if err != nil {
+		return User{}, err
+	}
+	if user.Id != id {
+		return User{}, db.ErrDBNotFound
+	}
+
+	return user, nil
+}

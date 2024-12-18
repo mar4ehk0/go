@@ -70,3 +70,31 @@ func (r *Repo) Update(product Product) error {
 
 	return nil
 }
+
+func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsId []int) ([]Product, error) {
+	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsId)
+	if err != nil {
+		return []Product{}, err
+	}
+
+	query = tx.Rebind(query)
+
+	products := []Product{}
+
+	rows, err := tx.Queryx(query, args...)
+
+	if err != nil {
+		return []Product{}, err
+	}
+
+	for rows.Next() {
+		var product Product
+		err := rows.StructScan(&product)
+		if err != nil {
+			return []Product{}, err
+		}
+		products = append(products, product)
+	}
+
+	return products, nil
+}

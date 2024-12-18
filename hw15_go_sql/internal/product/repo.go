@@ -72,7 +72,7 @@ func (r *Repo) Update(product Product) error {
 	return nil
 }
 
-func (r *Repo) GetManyWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
+func (r *Repo) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
 	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsID)
 	if err != nil {
 		return []Product{}, err
@@ -94,6 +94,18 @@ func (r *Repo) GetManyWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
 			return []Product{}, err
 		}
 		products = append(products, product)
+	}
+
+	return products, nil
+}
+
+func (r *Repo) GetManyByOrderIDWithTx(tx *sqlx.Tx, orderID int) ([]Product, error) {
+	products := []Product{}
+
+	query := "SELECT id, name, price FROM products p JOIN orders_products op ON op.product_id = p.id WHERE op.order_id=$1"
+	err := tx.Select(&products, query, orderID)
+	if err != nil {
+		return []Product{}, err
 	}
 
 	return products, nil

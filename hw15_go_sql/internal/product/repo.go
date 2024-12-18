@@ -2,6 +2,7 @@ package product
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -17,7 +18,8 @@ func NewRepo(db *sqlx.DB) *Repo {
 }
 
 func (r *Repo) Add(dto Dto) (int, error) {
-	stmt, err := r.db.PrepareNamed("INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id")
+	query := "INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id"
+	stmt, err := r.db.PrepareNamed(query)
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't do prepare query product {%s, %d} error: %w", dto.Name, dto.Price, err)
 		return 0, wrappedErr
@@ -34,11 +36,11 @@ func (r *Repo) Add(dto Dto) (int, error) {
 	return id, nil
 }
 
-func (r *Repo) GetById(id int) (Product, error) {
+func (r *Repo) GetByID(id int) (Product, error) {
 	var product Product
 
 	err := r.db.QueryRowx("SELECT id, name, price FROM products WHERE id=$1", id).StructScan(&product)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return product, db.ErrDBNotFound
 	}
 	if err != nil {
@@ -70,8 +72,8 @@ func (r *Repo) Update(product Product) error {
 	return nil
 }
 
-func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsId []int) ([]Product, error) {
-	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsId)
+func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
+	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsID)
 	if err != nil {
 		return []Product{}, err
 	}
@@ -87,7 +89,7 @@ func (r *Repo) GetByINWithTx(tx *sqlx.Tx, productsId []int) ([]Product, error) {
 
 	for rows.Next() {
 		var product Product
-		err := rows.StructScan(&product)
+		err = rows.StructScan(&product)
 		if err != nil {
 			return []Product{}, err
 		}

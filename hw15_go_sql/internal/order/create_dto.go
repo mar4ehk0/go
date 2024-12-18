@@ -6,8 +6,8 @@ import (
 )
 
 type CreateDto struct {
-	UserId     int   `json:"user_id"`
-	ProductsId []int `json:"products_id"`
+	UserID     int   `json:"user_id"`     //nolint:all
+	ProductsID []int `json:"products_id"` //nolint:all
 }
 
 func NewCreateDto(r io.Reader) (*CreateDto, error) {
@@ -17,7 +17,7 @@ func NewCreateDto(r io.Reader) (*CreateDto, error) {
 		return &dto, err
 	}
 
-	if dto.UserId < 1 || len(dto.ProductsId) < 1 {
+	if dto.UserID < 1 || len(dto.ProductsID) < 1 {
 		return &dto, ErrNotValidRequest
 	}
 

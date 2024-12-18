@@ -6,25 +6,28 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/jackc/pgx/stdlib"
+	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/order"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
-
-	_ "github.com/jackc/pgx/stdlib"
-	"github.com/jmoiron/sqlx"
 )
 
 func main() {
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err)
+		exit()
+	}
 
 	addr := server.NewAddr()
 
 	db, err := sqlx.Connect("pgx", os.Getenv("APP_DB_DSN"))
 	if err != nil {
 		log.Println(err)
-		os.Exit(1)
+		exit()
 	}
 	defer db.Close()
 
@@ -54,8 +57,12 @@ func main() {
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Println(err)
-		os.Exit(1)
+		exit()
 	}
+}
+
+func exit() {
+	os.Exit(1)
 }
 
 // func initializeRoutes(p *product.Handler) http.Handler {

@@ -21,8 +21,8 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /products", h.CreateProduct)
-	mux.HandleFunc("GET /products/{id}", h.GetProductById)
-	mux.HandleFunc("PATCH /products/{id}", h.UpdateProductById)
+	mux.HandleFunc("GET /products/{id}", h.GetProductByID)
+	mux.HandleFunc("PATCH /products/{id}", h.UpdateProductByID)
 }
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
@@ -54,17 +54,17 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(map[string]int{"id": pr.Id})
+	data, err := json.Marshal(map[string]int{"id": pr.ID})
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
 		return
 	}
 
-	server.CreateResponse(w, []byte(data), http.StatusCreated)
+	server.CreateResponse(w, data, http.StatusCreated)
 }
 
-func (h *Handler) GetProductById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
@@ -73,7 +73,7 @@ func (h *Handler) GetProductById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := h.service.GetById(id)
+	product, err := h.service.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
@@ -92,10 +92,10 @@ func (h *Handler) GetProductById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.CreateResponse(w, []byte(data), http.StatusCreated)
+	server.CreateResponse(w, data, http.StatusCreated)
 }
 
-func (h *Handler) UpdateProductById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)

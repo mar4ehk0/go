@@ -41,18 +41,18 @@ func (s *Service) Create(dto *CreateDto) (Order, error) {
 		}
 	}()
 
-	user, err := s.repoUser.GetByINWithTx(tx, dto.UserId)
+	user, err := s.repoUser.GetByINWithTx(tx, dto.UserID)
 	if err != nil {
 		return Order{}, err
 	}
 
-	products, err := s.repoProduct.GetByINWithTx(tx, dto.ProductsId)
+	products, err := s.repoProduct.GetByINWithTx(tx, dto.ProductsID)
 	if err != nil {
 		return Order{}, err
 	}
 
-	if len(products) != len(dto.ProductsId) {
-		return Order{}, fmt.Errorf("some products with ids %v not found", dto.ProductsId)
+	if len(products) != len(dto.ProductsID) {
+		return Order{}, fmt.Errorf("some products with ids %v not found", dto.ProductsID)
 	}
 
 	totalAmount := 0
@@ -63,10 +63,9 @@ func (s *Service) Create(dto *CreateDto) (Order, error) {
 	orderDate := time.Now()
 
 	id, err := s.repoOrder.Add(tx, user, products, totalAmount, orderDate)
-
 	if err != nil {
-		return Order{}, nil
+		return Order{}, err
 	}
 
-	return Order{Id: id, UserId: user.Id, OrderDate: orderDate, TotalAmount: totalAmount}, err
+	return Order{ID: id, UserID: user.ID, OrderDate: orderDate, TotalAmount: totalAmount}, err
 }

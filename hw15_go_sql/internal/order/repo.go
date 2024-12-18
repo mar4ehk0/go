@@ -17,23 +17,29 @@ func NewRepo(db *sqlx.DB) *Repo {
 	return &Repo{db: db}
 }
 
-func (r *Repo) Add(tx *sqlx.Tx, user user.User, products []product.Product, totalAmount int, date time.Time) (int, error) {
-	var orderId int
+func (r *Repo) Add(
+	tx *sqlx.Tx,
+	user user.User,
+	products []product.Product,
+	totalAmount int,
+	date time.Time,
+) (int, error) {
+	var orderID int
 	err := tx.QueryRow(
 		"INSERT INTO orders (user_id, order_date, total_amount) VALUES ($1, $2, $3) RETURNING id",
-		user.Id,
+		user.ID,
 		date,
-		totalAmount).Scan(&orderId)
+		totalAmount).Scan(&orderID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to insert order: %v", err)
+		return 0, fmt.Errorf("failed to insert order: %w", err)
 	}
 
 	for _, v := range products {
-		_, err := tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderId, v.Id)
+		_, err = tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, v.ID)
 		if err != nil {
-			return 0, fmt.Errorf("failed to insert order product: %v", err)
+			return 0, fmt.Errorf("failed to insert order product: %w", err)
 		}
 	}
 
-	return orderId, nil
+	return orderID, nil
 }

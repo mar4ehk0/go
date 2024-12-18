@@ -11,17 +11,17 @@ func NewService(repo *Repo) *Service {
 func (s *Service) Create(dto Dto) (Product, error) {
 	id, err := s.repo.Add(dto)
 
-	return Product{Id: id, Name: dto.Name, Price: dto.Price}, err
+	return Product{ID: id, Name: dto.Name, Price: dto.Price}, err
 }
 
-func (s *Service) GetById(id int) (Product, error) {
-	product, err := s.repo.GetById(id)
+func (s *Service) GetByID(id int) (Product, error) {
+	product, err := s.repo.GetByID(id)
 
 	return product, err
 }
 
 func (s *Service) Update(id int, dto Dto) (Product, error) {
-	product := Product{Id: id, Name: dto.Name, Price: dto.Price}
+	product := Product{ID: id, Name: dto.Name, Price: dto.Price}
 
 	err := s.repo.Update(product)
 

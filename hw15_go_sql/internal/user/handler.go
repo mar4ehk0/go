@@ -21,8 +21,8 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /users", h.Create)
-	mux.HandleFunc("GET /users/{id}", h.GetById)
-	mux.HandleFunc("PATCH /users/{id}", h.UpdateById)
+	mux.HandleFunc("GET /users/{id}", h.GetByID)
+	mux.HandleFunc("PATCH /users/{id}", h.UpdateByID)
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -50,17 +50,17 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(map[string]int{"id": user.Id})
+	data, err := json.Marshal(map[string]int{"id": user.ID})
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
 		return
 	}
 
-	server.CreateResponse(w, []byte(data), http.StatusCreated)
+	server.CreateResponse(w, data, http.StatusCreated)
 }
 
-func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
@@ -69,7 +69,7 @@ func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.service.GetById(id)
+	user, err := h.service.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
@@ -88,10 +88,10 @@ func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	server.CreateResponse(w, []byte(data), http.StatusCreated)
+	server.CreateResponse(w, data, http.StatusCreated)
 }
 
-func (h *Handler) UpdateById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
@@ -111,7 +111,7 @@ func (h *Handler) UpdateById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.UpdateById(id, dto)
+	err = h.service.UpdateByID(id, dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist user with same email"), http.StatusConflict)

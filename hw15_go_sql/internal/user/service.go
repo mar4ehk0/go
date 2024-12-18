@@ -24,16 +24,16 @@ func (s *Service) Create(dto *CreateDto) (User, error) {
 	dto.Password = string(hashedPassword)
 	id, err := s.repo.Add(dto)
 
-	return User{Id: id, Name: dto.Name, Email: dto.Email, Password: dto.Password}, err
+	return User{ID: id, Name: dto.Name, Email: dto.Email, Password: dto.Password}, err
 }
 
-func (s *Service) GetById(id int) (User, error) {
-	user, err := s.repo.GetById(id)
+func (s *Service) GetByID(id int) (User, error) {
+	user, err := s.repo.GetByID(id)
 
 	return user, err
 }
 
-func (s *Service) UpdateById(id int, dto *UpdateDto) error {
+func (s *Service) UpdateByID(id int, dto *UpdateDto) error {
 	err := s.repo.Update(id, dto)
 
 	return err

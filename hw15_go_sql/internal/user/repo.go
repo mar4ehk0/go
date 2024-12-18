@@ -2,6 +2,7 @@ package user
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -17,7 +18,8 @@ func NewRepo(db *sqlx.DB) *Repo {
 }
 
 func (r *Repo) Add(dto *CreateDto) (int, error) {
-	stmt, err := r.db.PrepareNamed("INSERT INTO users (name, email, password) VALUES (:name, :email, :password) RETURNING id")
+	query := "INSERT INTO users (name, email, password) VALUES (:name, :email, :password) RETURNING id"
+	stmt, err := r.db.PrepareNamed(query)
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't do prepare query user {%s, %s, %s} error: %w", dto.Name, dto.Email, dto.Password, err)
 		return 0, wrappedErr
@@ -34,11 +36,11 @@ func (r *Repo) Add(dto *CreateDto) (int, error) {
 	return id, nil
 }
 
-func (r *Repo) GetById(id int) (User, error) {
+func (r *Repo) GetByID(id int) (User, error) {
 	var user User
 
 	err := r.db.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1", id).StructScan(&user)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return user, db.ErrDBNotFound
 	}
 	if err != nil {
@@ -53,10 +55,10 @@ func (r *Repo) Update(id int, dto *UpdateDto) error {
 	msgErr := fmt.Sprintf("can't do prepare update user {%s, %s}", dto.Name, dto.Email)
 
 	result, err := r.db.NamedExec("UPDATE users SET name=:name, email=:email WHERE id=:id", struct {
-		Id    int
+		ID    int
 		Name  string
 		Email string
-	}{Id: id, Name: dto.Name, Email: dto.Email})
+	}{ID: id, Name: dto.Name, Email: dto.Email})
 	if err != nil {
 		err = db.ProcessError(err, msgErr)
 		return err
@@ -80,7 +82,7 @@ func (r *Repo) GetByINWithTx(tx *sqlx.Tx, id int) (User, error) {
 	if err != nil {
 		return User{}, err
 	}
-	if user.Id != id {
+	if user.ID != id {
 		return User{}, db.ErrDBNotFound
 	}
 

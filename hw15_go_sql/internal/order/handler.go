@@ -19,7 +19,7 @@ func NewHandler(service *Service) *Handler {
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /orders", h.Create)
-	mux.HandleFunc("GET /orders/{id}", h.GetById)
+	mux.HandleFunc("GET /orders/{id}", h.GetByID)
 	// mux.HandleFunc("PATCH /products/{id}", h.UpdateProductById)
 }
 
@@ -42,16 +42,16 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(map[string]int{"id": order.Id})
+	data, err := json.Marshal(map[string]int{"id": order.ID})
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
 		return
 	}
 
-	server.CreateResponse(w, []byte(data), http.StatusCreated)
+	server.CreateResponse(w, data, http.StatusCreated)
 }
 
-func (h *Handler) GetById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 }

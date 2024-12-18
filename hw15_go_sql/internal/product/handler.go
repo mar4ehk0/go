@@ -1,7 +1,6 @@
 package product
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -26,22 +25,18 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	///
-	var dto Dto
-	err := json.NewDecoder(r.Body).Decode(&dto)
+	dto, err := NewEntryDto(r.Body)
 	if err != nil {
+		if errors.Is(err, ErrNotValid) {
+			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
+			os.Stdout.Write([]byte("Can't update product, wrong input data.\n"))
+			return
+		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
 		return
 	}
 
-	if len(dto.Name) < 1 || dto.Price < 1 {
-		server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-		os.Stdout.Write([]byte("Can't create product, wrong input data.\n"))
-		return
-	}
-	/// перепишим на валидацию через product.NewDto
-
-	pr, err := h.service.Create(dto)
+	product, err := h.service.Create(dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist product"), http.StatusConflict)
@@ -54,7 +49,7 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(map[string]int{"id": pr.ID})
+	data, err := NewResponseCreateDto(product)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
@@ -85,7 +80,7 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := json.Marshal(product)
+	data, err := NewResponseReadDto(product)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
@@ -104,7 +99,7 @@ func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto, err := NewDto(r.Body)
+	dto, err := NewEntryDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValid) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
@@ -115,7 +110,7 @@ func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.service.Update(id, *dto)
+	_, err = h.service.Update(id, dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist product with same name"), http.StatusConflict)

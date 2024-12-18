@@ -17,7 +17,7 @@ func NewRepo(db *sqlx.DB) *Repo {
 	return &Repo{db: db}
 }
 
-func (r *Repo) Add(dto Dto) (int, error) {
+func (r *Repo) Add(dto *EntryDto) (int, error) {
 	query := "INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id"
 	stmt, err := r.db.PrepareNamed(query)
 	if err != nil {

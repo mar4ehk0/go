@@ -99,7 +99,7 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto, err := NewUpdateDto(r.Body)
+	dto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)

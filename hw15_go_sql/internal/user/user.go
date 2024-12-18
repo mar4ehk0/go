@@ -59,3 +59,27 @@ func NewResponseReadDto(user User) ([]byte, error) {
 	data, err := json.Marshal(dto)
 	return data, err
 }
+
+type EntryUpdateDto struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+func NewEntryUpdateDto(r io.Reader) (*EntryUpdateDto, error) {
+	var dto EntryUpdateDto
+	err := json.NewDecoder(r).Decode(&dto)
+	if err != nil {
+		return &dto, err
+	}
+
+	if len(dto.Name) < 1 || len(dto.Email) < 1 {
+		return &dto, ErrNotValidRequest
+	}
+
+	_, err = mail.ParseAddress(dto.Email)
+	if err != nil {
+		return &dto, ErrEmailNotValid
+	}
+
+	return &dto, nil
+}

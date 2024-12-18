@@ -33,7 +33,7 @@ func (s *Service) GetByID(id int) (User, error) {
 	return user, err
 }
 
-func (s *Service) UpdateByID(id int, dto *UpdateDto) error {
+func (s *Service) UpdateByID(id int, dto *EntryUpdateDto) error {
 	err := s.repo.Update(id, dto)
 
 	return err

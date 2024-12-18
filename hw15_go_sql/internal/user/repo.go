@@ -51,7 +51,7 @@ func (r *Repo) GetByID(id int) (User, error) {
 	return user, nil
 }
 
-func (r *Repo) Update(id int, dto *UpdateDto) error {
+func (r *Repo) Update(id int, dto *EntryUpdateDto) error {
 	msgErr := fmt.Sprintf("can't do prepare update user {%s, %s}", dto.Name, dto.Email)
 
 	result, err := r.db.NamedExec("UPDATE users SET name=:name, email=:email WHERE id=:id", struct {

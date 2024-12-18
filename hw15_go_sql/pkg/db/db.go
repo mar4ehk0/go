@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx"
+	"github.com/jmoiron/sqlx"
 )
 
 var ErrDBDuplicateKey = errors.New("duplicate key")
@@ -22,4 +23,10 @@ func ProcessError(err error, msgError string) error {
 	}
 
 	return err
+}
+
+func NewTransaction(db *sqlx.DB) (*sqlx.Tx, error) {
+	tx, err := db.Beginx()
+
+	return tx, err
 }

@@ -11,7 +11,7 @@ func NewResponseService() *ResponseService {
 	return &ResponseService{}
 }
 
-func (r ResponseService) Response(w http.ResponseWriter, data []byte, httpCode int, err error) {
+func (r ResponseService) CreateResponse(w http.ResponseWriter, data []byte, httpCode int, err error) {
 	if err != nil {
 		log.Println(err)
 	}

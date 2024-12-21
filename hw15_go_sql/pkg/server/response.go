@@ -23,12 +23,3 @@ func (r ResponseService) Response(w http.ResponseWriter, data []byte, httpCode i
 		log.Println(err)
 	}
 }
-
-func CreateResponse(w http.ResponseWriter, data []byte, code int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, err := w.Write(data)
-	if err != nil {
-		log.Println(err)
-	}
-}

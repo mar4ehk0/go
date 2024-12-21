@@ -67,11 +67,3 @@ func main() {
 func exit() {
 	os.Exit(1)
 }
-
-// func initializeRoutes(p *product.Handler) http.Handler {
-// 	mux := http.NewServeMux()
-// 	mux.HandleFunc("POST /products", p.CreateProduct)
-// 	mux.HandleFunc("GET /products/{id}", p.GetProductById)
-// 	mux.HandleFunc("PATCH /products/{id}", p.UpdateProductById)
-// 	return mux
-// }

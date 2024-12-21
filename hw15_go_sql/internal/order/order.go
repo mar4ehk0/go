@@ -15,17 +15,17 @@ var ErrNotValidRequest = errors.New("not valid request")
 type (
 	Order struct {
 		ID          int       `json:"id"`
-		UserID      int       `db:"user_id" json:"user_id"`            //nolint:all
-		OrderDate   time.Time `db:"order_date" json: "order_date"`     //nolint:all
-		TotalAmount int       `db:"total_amount" json: "total_amount"` //nolint:all
+		UserID      int       `db:"user_id" json:"user_id"`           //nolint:all
+		OrderDate   time.Time `db:"order_date" json:"order_date"`     //nolint:all
+		TotalAmount int       `db:"total_amount" json:"total_amount"` //nolint:all
 	}
 
 	OutputReadDto struct {
 		ID          int               `json:"id"`
 		User        user.User         `json:"user"`
-		OrderDate   time.Time         `json: "order_date"`   //nolint:all
-		TotalAmount int               `json: "total_amount"` //nolint:all
-		Products    []product.Product `json: "product"`      //nolint:all
+		OrderDate   time.Time         `json:"order_date"`   //nolint:all
+		TotalAmount int               `json:"total_amount"` //nolint:all
+		Products    []product.Product `json:"product"`      //nolint:all
 	}
 
 	EntryCreateDto struct {
@@ -43,9 +43,9 @@ type (
 
 	OutputUpdateDto struct {
 		ID          int               `json:"id"`
-		OrderDate   time.Time         `json: "order_date"`   //nolint:all
-		TotalAmount int               `json: "total_amount"` //nolint:all
-		Products    []product.Product `json: "product"`      //nolint:all
+		OrderDate   time.Time         `json:"order_date"`   //nolint:all
+		TotalAmount int               `json:"total_amount"` //nolint:all
+		Products    []product.Product `json:"product"`      //nolint:all
 	}
 )
 

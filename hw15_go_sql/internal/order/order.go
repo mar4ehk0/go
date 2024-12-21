@@ -63,7 +63,7 @@ func NewEntryCreateDto(r io.Reader) (*EntryCreateDto, error) {
 	return &dto, nil
 }
 
-func NewResponseCreate(order Order) ([]byte, error) {
+func NewResponseCreateDto(order Order) ([]byte, error) {
 	dto := ResponseCreateDto{ID: order.ID}
 	data, err := json.Marshal(dto)
 	return data, err

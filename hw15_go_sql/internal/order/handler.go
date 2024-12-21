@@ -55,7 +55,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.Response(w, []byte(err.Error()), http.StatusBadRequest, err)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	orderID, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.Response(w, []byte(err.Error()), http.StatusBadRequest, err)
 		return
 	}
 

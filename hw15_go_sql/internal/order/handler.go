@@ -2,7 +2,6 @@ package order
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -26,7 +25,7 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	dto, err := NewEntryCreateDto(r.Body)
+	entryDto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
@@ -37,21 +36,21 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := h.service.Create(dto)
+	order, err := h.service.Create(entryDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error() + "\n"))
 		return
 	}
 
-	data, err := NewResponseCreateDto(order)
+	response, err := NewResponseCreateDto(order)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	server.CreateResponse(w, response, http.StatusCreated)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +62,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto, err := h.service.GetByID(id)
+	outputDto, err := h.service.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
@@ -75,14 +74,14 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseReadDto(dto)
+	response, err := NewResponseReadDto(outputDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	server.CreateResponse(w, response, http.StatusCreated)
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +93,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto, err := NewEntryUpdateDto(r.Body)
+	entryDto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
@@ -105,7 +104,12 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.service.Update(orderID, dto)
+	_, err = h.service.Update(orderID, entryDto)
+	if err != nil {
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		os.Stdout.Write([]byte(err.Error()))
+		return
+	}
 
-	fmt.Println(err)
+	server.CreateResponse(w, []byte{}, http.StatusNoContent)
 }

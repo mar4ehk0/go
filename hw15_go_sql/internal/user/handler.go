@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -11,11 +10,12 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	userService *Service
+	respService *server.ResponseService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(userService *Service, respService *server.ResponseService) *Handler {
+	return &Handler{userService: userService, respService: respService}
 }
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
@@ -28,35 +28,31 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	dto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
-			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not valid values"), http.StatusBadRequest, err)
 			return
 		}
-		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		h.respService.Response(w, []byte(err.Error()), http.StatusBadRequest, err)
 		return
 	}
 
-	user, err := h.service.Create(dto)
+	user, err := h.userService.Create(dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			server.CreateResponse(w, []byte("Already exist user"), http.StatusConflict)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Already exist user"), http.StatusConflict, err)
 			return
 		}
 
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseCreateDto(user)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	h.respService.Response(w, data, http.StatusCreated, nil)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -64,31 +60,27 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	user, err := h.service.GetByID(id)
+	user, err := h.userService.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
-			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not found"), http.StatusNotFound, err)
 			return
 		}
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseReadDto(user)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	h.respService.Response(w, data, http.StatusOK, nil)
 }
 
 func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
@@ -96,40 +88,35 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	dto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
-			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not valid values"), http.StatusBadRequest, err)
 			return
 		}
-		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		h.respService.Response(w, []byte(err.Error()), http.StatusBadRequest, err)
 		return
 	}
 
-	err = h.service.UpdateByID(id, dto)
+	err = h.userService.UpdateByID(id, dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			server.CreateResponse(w, []byte("Already exist user with same email"), http.StatusConflict)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Already exist user with same email"), http.StatusConflict, err)
 			return
 		}
 
 		if errors.Is(err, db.ErrDBNotFound) {
-			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not found"), http.StatusNotFound, err)
 			return
 		}
 
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	server.CreateResponse(w, []byte(""), http.StatusNoContent)
+	h.respService.Response(w, []byte{}, http.StatusNoContent, nil)
 }

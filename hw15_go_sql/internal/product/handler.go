@@ -2,7 +2,6 @@ package product
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -11,11 +10,15 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	productService *Service
+	respService    *server.ResponseService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(productService *Service, respService *server.ResponseService) *Handler {
+	return &Handler{
+		productService: productService,
+		respService:    respService,
+	}
 }
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
@@ -28,35 +31,31 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	dto, err := NewEntryDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValid) {
-			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not valid values"), http.StatusBadRequest, err)
 			return
 		}
-		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		h.respService.Response(w, []byte(err.Error()), http.StatusBadRequest, err)
 		return
 	}
 
-	product, err := h.service.Create(dto)
+	product, err := h.productService.Create(dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			server.CreateResponse(w, []byte("Already exist product"), http.StatusConflict)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Already exist product"), http.StatusConflict, err)
 			return
 		}
 
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseCreateDto(product)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	h.respService.Response(w, data, http.StatusCreated, nil)
 }
 
 func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
@@ -64,30 +63,27 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	product, err := h.service.GetByID(id)
+	product, err := h.productService.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
-			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not found"), http.StatusNotFound, err)
 			return
 		}
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseReadDto(product)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	server.CreateResponse(w, data, http.StatusCreated)
+	h.respService.Response(w, data, http.StatusCreated, nil)
 }
 
 func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
@@ -95,36 +91,32 @@ func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
 	dto, err := NewEntryDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValid) {
-			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not valid values"), http.StatusBadRequest, err)
 			return
 		}
-		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 		return
 	}
 
-	_, err = h.service.Update(id, dto)
+	_, err = h.productService.Update(id, dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			server.CreateResponse(w, []byte("Already exist product with same name"), http.StatusConflict)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Already exist product with same name"), http.StatusConflict, err)
 			return
 		}
 		if errors.Is(err, db.ErrDBNotFound) {
-			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			log.Println(err.Error())
+			h.respService.Response(w, []byte("Not found"), http.StatusNotFound, err)
 			return
 		}
-		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		log.Println(err.Error())
+		h.respService.Response(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
 	}
 
-	server.CreateResponse(w, []byte(""), http.StatusNoContent)
+	h.respService.Response(w, []byte{}, http.StatusNoContent, nil)
 }

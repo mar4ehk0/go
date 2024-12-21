@@ -34,16 +34,18 @@ func main() {
 
 	dbConnect := db.NewDBConnect(sqlxDB)
 
+	respService := server.NewResponseService()
+
 	mux := http.NewServeMux()
 
 	repoProduct := product.NewRepoProduct(dbConnect)
 	serviceProduct := product.NewService(repoProduct)
-	handlerProduct := product.NewHandler(serviceProduct)
+	handlerProduct := product.NewHandler(serviceProduct, respService)
 	handlerProduct.InitializeRoutes(mux)
 
 	repoUser := user.NewRepoUser(dbConnect)
 	serviceUser := user.NewService(repoUser)
-	handlerUser := user.NewHandler(serviceUser)
+	handlerUser := user.NewHandler(serviceUser, respService)
 	handlerUser.InitializeRoutes(mux)
 
 	repoOrder := order.NewRepoOrder(dbConnect)

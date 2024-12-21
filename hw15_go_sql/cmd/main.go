@@ -50,7 +50,8 @@ func main() {
 
 	repoOrder := order.NewRepoOrder(dbConnect)
 	serviceOrder := order.NewService(repoOrder, repoProduct, repoUser)
-	handlerOrder := order.NewHandler(serviceOrder)
+	handlerOrder := order.NewHandler(serviceOrder, respService)
+
 	handlerOrder.InitializeRoutes(mux)
 
 	server := &http.Server{

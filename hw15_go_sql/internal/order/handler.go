@@ -11,11 +11,12 @@ import (
 )
 
 type Handler struct {
-	service *Service
+	orderService *Service
+	respService  *server.ResponseService
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(orderService *Service, respService *server.ResponseService) *Handler {
+	return &Handler{orderService: orderService, respService: respService}
 }
 
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
@@ -36,7 +37,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order, err := h.service.Create(entryDto)
+	order, err := h.orderService.Create(entryDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		log.Println(err.Error())
@@ -62,7 +63,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	outputDto, err := h.service.GetByID(id)
+	outputDto, err := h.orderService.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
@@ -104,7 +105,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.service.Update(orderID, entryDto)
+	_, err = h.orderService.Update(orderID, entryDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		log.Println(err.Error())

@@ -12,6 +12,7 @@ import (
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/order"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/server"
 )
 
@@ -24,26 +25,28 @@ func main() {
 
 	addr := server.NewAddr()
 
-	db, err := sqlx.Connect("pgx", os.Getenv("APP_DB_DSN"))
+	sqlxDB, err := sqlx.Connect("pgx", os.Getenv("APP_DB_DSN"))
 	if err != nil {
 		log.Println(err)
 		exit()
 	}
-	defer db.Close()
+	defer sqlxDB.Close()
+
+	dbConnect := db.NewDBConnect(sqlxDB)
 
 	mux := http.NewServeMux()
 
-	repoProduct := product.NewRepo(db)
+	repoProduct := product.NewRepoProduct(dbConnect)
 	serviceProduct := product.NewService(repoProduct)
 	handlerProduct := product.NewHandler(serviceProduct)
 	handlerProduct.InitializeRoutes(mux)
 
-	repoUser := user.NewRepo(db)
+	repoUser := user.NewRepoUser(dbConnect)
 	serviceUser := user.NewService(repoUser)
 	handlerUser := user.NewHandler(serviceUser)
 	handlerUser.InitializeRoutes(mux)
 
-	repoOrder := order.NewRepo(db)
+	repoOrder := order.NewRepoOrder(dbConnect)
 	serviceOrder := order.NewService(repoOrder, repoProduct, repoUser)
 	handlerOrder := order.NewHandler(serviceOrder)
 	handlerOrder.InitializeRoutes(mux)

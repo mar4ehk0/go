@@ -7,16 +7,15 @@ import (
 
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
-	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
 
 type Service struct {
-	repoOrder   *Repo
-	repoProduct *product.Repo
-	repoUser    *user.Repo
+	repoOrder   *RepoOrder
+	repoProduct *product.RepoProduct
+	repoUser    *user.RepoUser
 }
 
-func NewService(repoOrder *Repo, repoProduct *product.Repo, repoUser *user.Repo) *Service {
+func NewService(repoOrder *RepoOrder, repoProduct *product.RepoProduct, repoUser *user.RepoUser) *Service {
 	return &Service{
 		repoOrder:   repoOrder,
 		repoProduct: repoProduct,
@@ -25,7 +24,7 @@ func NewService(repoOrder *Repo, repoProduct *product.Repo, repoUser *user.Repo)
 }
 
 func (s *Service) Create(dto *EntryCreateDto) (Order, error) {
-	tx, err := db.NewTransaction(s.repoOrder.db)
+	tx, err := s.repoOrder.db.NewTransaction()
 	if err != nil {
 		return Order{}, err
 	}
@@ -67,7 +66,7 @@ func (s *Service) Create(dto *EntryCreateDto) (Order, error) {
 }
 
 func (s *Service) GetByID(id int) (OutputReadDto, error) {
-	tx, err := db.NewTransaction(s.repoOrder.db)
+	tx, err := s.repoOrder.db.NewTransaction()
 	if err != nil {
 		return OutputReadDto{}, err
 	}
@@ -108,7 +107,7 @@ func (s *Service) GetByID(id int) (OutputReadDto, error) {
 }
 
 func (s *Service) Update(orderID int, dto *EntryUpdateDto) (OutputUpdateDto, error) {
-	tx, err := db.NewTransaction(s.repoOrder.db)
+	tx, err := s.repoOrder.db.NewTransaction()
 	if err != nil {
 		return OutputUpdateDto{}, err
 	}

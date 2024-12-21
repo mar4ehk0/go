@@ -10,15 +10,15 @@ import (
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
 
-type Repo struct {
-	db *sqlx.DB
+type RepoOrder struct {
+	db *db.Connect
 }
 
-func NewRepo(db *sqlx.DB) *Repo {
-	return &Repo{db: db}
+func NewRepoOrder(connect *db.Connect) *RepoOrder {
+	return &RepoOrder{db: connect}
 }
 
-func (r *Repo) AddWithTx(
+func (r *RepoOrder) AddWithTx(
 	tx *sqlx.Tx,
 	user user.User,
 	products []product.Product,
@@ -45,7 +45,7 @@ func (r *Repo) AddWithTx(
 	return orderID, nil
 }
 
-func (r *Repo) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
+func (r *RepoOrder) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
 	var order Order
 	err := tx.QueryRowx("SELECT id, user_id, order_date, total_amount FROM orders WHERE id=$1", id).StructScan(&order)
 	if err != nil {
@@ -59,7 +59,7 @@ func (r *Repo) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
 	return order, nil
 }
 
-func (r *Repo) DeleteProductsByIDWithTx(tx *sqlx.Tx, orderID int) error {
+func (r *RepoOrder) DeleteProductsByIDWithTx(tx *sqlx.Tx, orderID int) error {
 	res, err := tx.Exec("DELETE FROM orders_products WHERE order_id=$1", orderID)
 	if err != nil {
 		return fmt.Errorf("failed to exec delete orders_products: %w", err)
@@ -77,7 +77,7 @@ func (r *Repo) DeleteProductsByIDWithTx(tx *sqlx.Tx, orderID int) error {
 	return nil
 }
 
-func (r *Repo) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID []int) error {
+func (r *RepoOrder) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID []int) error {
 	for _, productID := range productsID {
 		_, err := tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, productID)
 		if err != nil {
@@ -88,7 +88,7 @@ func (r *Repo) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID []int)
 	return nil
 }
 
-func (r *Repo) UpdateTotalAmountOrderWithTX(tx *sqlx.Tx, orderID int, totalAmount int) error {
+func (r *RepoOrder) UpdateTotalAmountOrderWithTX(tx *sqlx.Tx, orderID int, totalAmount int) error {
 	_, err := tx.Exec("UPDATE orders SET total_amount=$1 WHERE id=$2", totalAmount, orderID)
 	if err != nil {
 		return fmt.Errorf("failed to exec delete orders_products: %w", err)

@@ -1,10 +1,10 @@
 package product
 
 type Service struct {
-	repo *Repo
+	repo *RepoProduct
 }
 
-func NewService(repo *Repo) *Service {
+func NewService(repo *RepoProduct) *Service {
 	return &Service{repo: repo}
 }
 

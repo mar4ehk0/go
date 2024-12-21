@@ -9,17 +9,17 @@ import (
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
 
-type Repo struct {
-	db *sqlx.DB
+type RepoUser struct {
+	db *db.Connect
 }
 
-func NewRepo(db *sqlx.DB) *Repo {
-	return &Repo{db: db}
+func NewRepoUser(connect *db.Connect) *RepoUser {
+	return &RepoUser{db: connect}
 }
 
-func (r *Repo) Add(dto *EntryCreateDto) (int, error) {
+func (r *RepoUser) Add(dto *EntryCreateDto) (int, error) {
 	query := "INSERT INTO users (name, email, password) VALUES (:name, :email, :password) RETURNING id"
-	stmt, err := r.db.PrepareNamed(query)
+	stmt, err := r.db.Connect.PrepareNamed(query)
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't do prepare query user {%s, %s, %s} error: %w", dto.Name, dto.Email, dto.Password, err)
 		return 0, wrappedErr
@@ -36,10 +36,10 @@ func (r *Repo) Add(dto *EntryCreateDto) (int, error) {
 	return id, nil
 }
 
-func (r *Repo) GetByID(id int) (User, error) {
+func (r *RepoUser) GetByID(id int) (User, error) {
 	var user User
 
-	err := r.db.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1", id).StructScan(&user)
+	err := r.db.Connect.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1", id).StructScan(&user)
 	if errors.Is(err, sql.ErrNoRows) {
 		return user, db.ErrDBNotFound
 	}
@@ -51,10 +51,10 @@ func (r *Repo) GetByID(id int) (User, error) {
 	return user, nil
 }
 
-func (r *Repo) Update(id int, dto *EntryUpdateDto) error {
+func (r *RepoUser) Update(id int, dto *EntryUpdateDto) error {
 	msgErr := fmt.Sprintf("can't do prepare update user {%s, %s}", dto.Name, dto.Email)
 
-	result, err := r.db.NamedExec("UPDATE users SET name=:name, email=:email WHERE id=:id", struct {
+	result, err := r.db.Connect.NamedExec("UPDATE users SET name=:name, email=:email WHERE id=:id", struct {
 		ID    int
 		Name  string
 		Email string
@@ -76,7 +76,7 @@ func (r *Repo) Update(id int, dto *EntryUpdateDto) error {
 	return nil
 }
 
-func (r *Repo) GetByIDWithTx(tx *sqlx.Tx, id int) (User, error) {
+func (r *RepoUser) GetByIDWithTx(tx *sqlx.Tx, id int) (User, error) {
 	var user User
 	err := tx.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1;", id).StructScan(&user)
 	if err != nil {

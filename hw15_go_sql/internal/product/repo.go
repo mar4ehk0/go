@@ -9,17 +9,17 @@ import (
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
 
-type Repo struct {
-	db *sqlx.DB
+type RepoProduct struct {
+	db *db.Connect
 }
 
-func NewRepo(db *sqlx.DB) *Repo {
-	return &Repo{db: db}
+func NewRepoProduct(connect *db.Connect) *RepoProduct {
+	return &RepoProduct{db: connect}
 }
 
-func (r *Repo) Add(dto *EntryDto) (int, error) {
+func (r *RepoProduct) Add(dto *EntryDto) (int, error) {
 	query := "INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id"
-	stmt, err := r.db.PrepareNamed(query)
+	stmt, err := r.db.Connect.PrepareNamed(query)
 	if err != nil {
 		wrappedErr := fmt.Errorf("can't do prepare query product {%s, %d} error: %w", dto.Name, dto.Price, err)
 		return 0, wrappedErr
@@ -36,10 +36,10 @@ func (r *Repo) Add(dto *EntryDto) (int, error) {
 	return id, nil
 }
 
-func (r *Repo) GetByID(id int) (Product, error) {
+func (r *RepoProduct) GetByID(id int) (Product, error) {
 	var product Product
 
-	err := r.db.QueryRowx("SELECT id, name, price FROM products WHERE id=$1", id).StructScan(&product)
+	err := r.db.Connect.QueryRowx("SELECT id, name, price FROM products WHERE id=$1", id).StructScan(&product)
 	if errors.Is(err, sql.ErrNoRows) {
 		return product, db.ErrDBNotFound
 	}
@@ -51,10 +51,10 @@ func (r *Repo) GetByID(id int) (Product, error) {
 	return product, nil
 }
 
-func (r *Repo) Update(product Product) error {
+func (r *RepoProduct) Update(product Product) error {
 	msgErr := fmt.Sprintf("can't do prepare update product {%s, %d}", product.Name, product.Price)
 
-	result, err := r.db.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
+	result, err := r.db.Connect.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
 	if err != nil {
 		err = db.ProcessError(err, msgErr)
 		return err
@@ -72,7 +72,7 @@ func (r *Repo) Update(product Product) error {
 	return nil
 }
 
-func (r *Repo) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
+func (r *RepoProduct) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
 	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsID)
 	if err != nil {
 		return []Product{}, err
@@ -99,7 +99,7 @@ func (r *Repo) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) ([]Produ
 	return products, nil
 }
 
-func (r *Repo) GetManyByOrderIDWithTx(tx *sqlx.Tx, orderID int) ([]Product, error) {
+func (r *RepoProduct) GetManyByOrderIDWithTx(tx *sqlx.Tx, orderID int) ([]Product, error) {
 	products := []Product{}
 
 	query := "SELECT id, name, price FROM products p JOIN orders_products op ON op.product_id = p.id WHERE op.order_id=$1"

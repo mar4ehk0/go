@@ -13,6 +13,20 @@ var (
 	ErrDBNotFound     = errors.New("not found")
 )
 
+type Connect struct {
+	Connect *sqlx.DB
+}
+
+func NewDBConnect(db *sqlx.DB) *Connect {
+	return &Connect{Connect: db}
+}
+
+func (d *Connect) NewTransaction() (*sqlx.Tx, error) {
+	tx, err := d.Connect.Beginx()
+
+	return tx, err
+}
+
 func ProcessError(err error, msgError string) error {
 	pgErr, ok := err.(pgx.PgError)
 
@@ -27,10 +41,4 @@ func ProcessError(err error, msgError string) error {
 	}
 
 	return err
-}
-
-func NewTransaction(db *sqlx.DB) (*sqlx.Tx, error) {
-	tx, err := db.Beginx()
-
-	return tx, err
 }

@@ -2,8 +2,8 @@ package product
 
 import (
 	"errors"
+	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
@@ -29,7 +29,7 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValid) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't update product, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -40,19 +40,19 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist product"), http.StatusConflict)
-			os.Stdout.Write([]byte("Can't create product, already exist product.\n"))
+			log.Println(err.Error())
 			return
 		}
 
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	data, err := NewResponseCreateDto(product)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -72,18 +72,18 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			os.Stdout.Write([]byte(err.Error() + "\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	data, err := NewResponseReadDto(product)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -103,7 +103,7 @@ func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValid) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't update product, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -114,16 +114,16 @@ func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist product with same name"), http.StatusConflict)
-			os.Stdout.Write([]byte("Can't update product, Already exist product with same name.\n"))
+			log.Println(err.Error())
 			return
 		}
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			os.Stdout.Write([]byte(err.Error() + "\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 	}
 
 	server.CreateResponse(w, []byte(""), http.StatusNoContent)

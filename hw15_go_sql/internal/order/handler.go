@@ -2,8 +2,8 @@ package order
 
 import (
 	"errors"
+	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
@@ -29,7 +29,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't create order, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -39,14 +39,14 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	order, err := h.service.Create(entryDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	response, err := NewResponseCreateDto(order)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -66,18 +66,18 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			os.Stdout.Write([]byte(err.Error() + "\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	response, err := NewResponseReadDto(outputDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't create order, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -107,7 +107,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	_, err = h.service.Update(orderID, entryDto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 

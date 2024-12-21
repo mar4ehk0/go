@@ -2,8 +2,8 @@ package user
 
 import (
 	"errors"
+	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
@@ -29,7 +29,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't create user, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -40,19 +40,19 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist user"), http.StatusConflict)
-			os.Stdout.Write([]byte("Can't create user, already exist user.\n"))
+			log.Println(err.Error())
 			return
 		}
 
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	data, err := NewResponseCreateDto(user)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -65,6 +65,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
@@ -72,18 +73,18 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			os.Stdout.Write([]byte(err.Error() + "\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 
 	data, err := NewResponseReadDto(user)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error()))
+		log.Println(err.Error())
 		return
 	}
 
@@ -96,6 +97,7 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		log.Println(err.Error())
 		return
 	}
 
@@ -103,7 +105,7 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
 			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
-			os.Stdout.Write([]byte("Can't update user, wrong input data.\n"))
+			log.Println(err.Error())
 			return
 		}
 		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
@@ -114,18 +116,18 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
 			server.CreateResponse(w, []byte("Already exist user with same email"), http.StatusConflict)
-			os.Stdout.Write([]byte("Can't update user, Already exist user with same email.\n"))
+			log.Println(err.Error())
 			return
 		}
 
 		if errors.Is(err, db.ErrDBNotFound) {
 			server.CreateResponse(w, []byte("Not found"), http.StatusNotFound)
-			os.Stdout.Write([]byte(err.Error() + "\n"))
+			log.Println(err.Error())
 			return
 		}
 
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
-		os.Stdout.Write([]byte(err.Error() + "\n"))
+		log.Println(err.Error())
 		return
 	}
 

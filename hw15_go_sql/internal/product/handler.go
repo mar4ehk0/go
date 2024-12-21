@@ -49,13 +49,13 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseCreateDto(product)
+	response, err := NewResponseCreateDto(product)
 	if err != nil {
 		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponseCreated(w, data)
+	h.respService.CreateResponseCreated(w, response)
 }
 
 func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
@@ -77,13 +77,13 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseReadDto(product)
+	response, err := NewResponseReadDto(product)
 	if err != nil {
 		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponseOK(w, data)
+	h.respService.CreateResponseOK(w, response)
 }
 
 func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {

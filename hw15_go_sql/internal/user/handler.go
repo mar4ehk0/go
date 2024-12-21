@@ -46,13 +46,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseCreateDto(user)
+	response, err := NewResponseCreateDto(user)
 	if err != nil {
 		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponseCreated(w, data)
+	h.respService.CreateResponseCreated(w, response)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -74,13 +74,13 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseReadDto(user)
+	response, err := NewResponseReadDto(user)
 	if err != nil {
 		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponseOK(w, data)
+	h.respService.CreateResponseOK(w, response)
 }
 
 func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {

@@ -28,31 +28,31 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	dto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest, err)
+			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
 			return
 		}
-		h.respService.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
 		return
 	}
 
 	user, err := h.userService.Create(dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponse(w, []byte("Already exist user"), http.StatusConflict, err)
+			h.respService.CreateResponseError(w, "Already exist user", http.StatusConflict, err)
 			return
 		}
 
-		h.respService.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseCreateDto(user)
 	if err != nil {
-		h.respService.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponse(w, data, http.StatusCreated, nil)
+	h.respService.CreateResponseCreated(w, data)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -60,27 +60,27 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
 		return
 	}
 
 	user, err := h.userService.GetByID(id)
 	if err != nil {
 		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponse(w, []byte("Not found"), http.StatusNotFound, err)
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
 			return
 		}
-		h.respService.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
 	data, err := NewResponseReadDto(user)
 	if err != nil {
-		h.respService.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponse(w, data, http.StatusOK, nil)
+	h.respService.CreateResponseOK(w, data)
 }
 
 func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
@@ -88,35 +88,35 @@ func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
 		return
 	}
 
 	dto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
 		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest, err)
+			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
 			return
 		}
-		h.respService.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
 		return
 	}
 
 	err = h.userService.UpdateByID(id, dto)
 	if err != nil {
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponse(w, []byte("Already exist user with same email"), http.StatusConflict, err)
+			h.respService.CreateResponseError(w, "Already exist user with same email", http.StatusConflict, err)
 			return
 		}
 
 		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponse(w, []byte("Not found"), http.StatusNotFound, err)
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
 			return
 		}
 
-		h.respService.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
 		return
 	}
 
-	h.respService.CreateResponse(w, []byte{}, http.StatusNoContent, nil)
+	h.respService.CreateResponseNoContent(w)
 }

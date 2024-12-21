@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/db"
 )
 
 type Repo struct {
@@ -37,7 +38,7 @@ func (r *Repo) AddWithTx(
 	for _, v := range products {
 		_, err = tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, v.ID)
 		if err != nil {
-			return 0, fmt.Errorf("failed to insert order product: %w", err)
+			return 0, fmt.Errorf("failed to insert orders_products with order: %w", err)
 		}
 	}
 
@@ -51,5 +52,46 @@ func (r *Repo) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
 		return order, fmt.Errorf("failed to select order: %w", err)
 	}
 
+	if id != order.ID {
+		return order, db.ErrDBNotFound
+	}
+
 	return order, nil
+}
+
+func (r *Repo) DeleteProductsByIDWithTx(tx *sqlx.Tx, orderID int) error {
+	res, err := tx.Exec("DELETE FROM orders_products WHERE order_id=$1", orderID)
+	if err != nil {
+		return fmt.Errorf("failed to exec delete orders_products: %w", err)
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to rowsAffected delete orders_products: %w", err)
+	}
+
+	if count == 0 {
+		return fmt.Errorf("failed to delete orders_products")
+	}
+
+	return nil
+}
+
+func (r *Repo) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID []int) error {
+	for _, productID := range productsID {
+		_, err := tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, productID)
+		if err != nil {
+			return fmt.Errorf("failed to insert orders_products: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (r *Repo) UpdateTotalAmountOrderWithTX(tx *sqlx.Tx, orderID int, totalAmount int) error {
+	_, err := tx.Exec("UPDATE orders SET total_amount=$1 WHERE id=$2", totalAmount, orderID)
+	if err != nil {
+		return fmt.Errorf("failed to exec delete orders_products: %w", err)
+	}
+	return nil
 }

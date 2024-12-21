@@ -55,11 +55,7 @@ func (s *Service) Create(dto *EntryCreateDto) (Order, error) {
 		return Order{}, fmt.Errorf("some products with ids %v not found", dto.ProductsID)
 	}
 
-	totalAmount := 0
-	for _, v := range products {
-		totalAmount += v.Price
-	}
-
+	totalAmount := s.calculateTotalAmount(products)
 	orderDate := time.Now()
 
 	id, err := s.repoOrder.AddWithTx(tx, user, products, totalAmount, orderDate)
@@ -109,4 +105,62 @@ func (s *Service) GetByID(id int) (OutputReadDto, error) {
 		TotalAmount: order.TotalAmount,
 		Products:    products,
 	}, nil
+}
+
+func (s *Service) Update(orderID int, dto *EntryUpdateDto) (OutputUpdateDto, error) {
+	tx, err := db.NewTransaction(s.repoOrder.db)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+	defer func() {
+		var dbErr error
+		if err != nil {
+			dbErr = tx.Rollback()
+		} else {
+			dbErr = tx.Commit()
+		}
+		if dbErr != nil {
+			log.Println(dbErr)
+		}
+	}()
+
+	order, err := s.repoOrder.GetByIDWithTx(tx, orderID)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+
+	products, err := s.repoProduct.GetManyByProductsIDWithTx(tx, dto.ProductsID)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+	if len(products) != len(dto.ProductsID) {
+		return OutputUpdateDto{}, fmt.Errorf("some products with ids %v not found", dto.ProductsID)
+	}
+
+	err = s.repoOrder.DeleteProductsByIDWithTx(tx, orderID)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+
+	err = s.repoOrder.AddProductsByIDWithTx(tx, orderID, dto.ProductsID)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+
+	totalAmount := s.calculateTotalAmount(products)
+	err = s.repoOrder.UpdateTotalAmountOrderWithTX(tx, orderID, totalAmount)
+	if err != nil {
+		return OutputUpdateDto{}, err
+	}
+
+	return OutputUpdateDto{ID: orderID, OrderDate: order.OrderDate, TotalAmount: totalAmount, Products: products}, err
+}
+
+func (s *Service) calculateTotalAmount(products []product.Product) int {
+	totalAmount := 0
+	for _, v := range products {
+		totalAmount += v.Price
+	}
+
+	return totalAmount
 }

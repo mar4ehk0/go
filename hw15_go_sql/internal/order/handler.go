@@ -2,6 +2,7 @@ package order
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -21,7 +22,7 @@ func NewHandler(service *Service) *Handler {
 func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /orders", h.Create)
 	mux.HandleFunc("GET /orders/{id}", h.GetByID)
-	// mux.HandleFunc("PATCH /products/{id}", h.UpdateProductById)
+	mux.HandleFunc("PUT /orders/{id}", h.Update)
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -82,4 +83,29 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	server.CreateResponse(w, data, http.StatusCreated)
+}
+
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	idRaw := r.PathValue("id")
+
+	orderID, err := strconv.Atoi(idRaw)
+	if err != nil {
+		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
+		return
+	}
+
+	dto, err := NewEntryUpdateDto(r.Body)
+	if err != nil {
+		if errors.Is(err, ErrNotValidRequest) {
+			server.CreateResponse(w, []byte("Not valid values"), http.StatusBadRequest)
+			os.Stdout.Write([]byte("Can't create order, wrong input data.\n"))
+			return
+		}
+		server.CreateResponse(w, []byte(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	_, err = h.service.Update(orderID, dto)
+
+	fmt.Println(err)
 }

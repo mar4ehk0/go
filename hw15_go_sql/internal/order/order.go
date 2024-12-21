@@ -36,6 +36,17 @@ type (
 	ResponseCreateDto struct {
 		ID int `json:"id"`
 	}
+
+	EntryUpdateDto struct {
+		ProductsID []int `json:"products_id"` //nolint:all
+	}
+
+	OutputUpdateDto struct {
+		ID          int               `json:"id"`
+		OrderDate   time.Time         `json: "order_date"`   //nolint:all
+		TotalAmount int               `json: "total_amount"` //nolint:all
+		Products    []product.Product `json: "product"`      //nolint:all
+	}
 )
 
 func NewEntryCreateDto(r io.Reader) (*EntryCreateDto, error) {
@@ -61,4 +72,18 @@ func NewResponseCreate(order Order) ([]byte, error) {
 func NewResponseRead(order OutputReadDto) ([]byte, error) {
 	data, err := json.Marshal(order)
 	return data, err
+}
+
+func NewEntryUpdateDto(r io.Reader) (*EntryUpdateDto, error) {
+	var dto EntryUpdateDto
+	err := json.NewDecoder(r).Decode(&dto)
+	if err != nil {
+		return &dto, err
+	}
+
+	if len(dto.ProductsID) < 1 {
+		return &dto, ErrNotValidRequest
+	}
+
+	return &dto, nil
 }

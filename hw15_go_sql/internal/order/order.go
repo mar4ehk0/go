@@ -69,7 +69,7 @@ func NewResponseCreateDto(order Order) ([]byte, error) {
 	return data, err
 }
 
-func NewResponseRead(order OutputReadDto) ([]byte, error) {
+func NewResponseReadDto(order OutputReadDto) ([]byte, error) {
 	data, err := json.Marshal(order)
 	return data, err
 }

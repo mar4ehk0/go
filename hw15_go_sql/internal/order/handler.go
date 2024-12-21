@@ -75,7 +75,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := NewResponseRead(dto)
+	data, err := NewResponseReadDto(dto)
 	if err != nil {
 		server.CreateResponse(w, []byte("Something went wrong"), http.StatusInternalServerError)
 		os.Stdout.Write([]byte(err.Error()))

@@ -3,13 +3,16 @@ package user
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/mail"
 )
 
 var (
 	ErrNotValidRequest = errors.New("not valid request")
-	ErrEmailNotValid   = errors.New("not valid email")
+	ErrEmptyName       = errors.New("empty name")
+	ErrEmptyEmail      = errors.New("empty email")
+	ErrEmptyPassword   = errors.New("empty password")
 )
 
 type (
@@ -44,18 +47,27 @@ type (
 
 func NewEntryCreateDto(r io.Reader) (*EntryCreateDto, error) {
 	var dto EntryCreateDto
+
 	err := json.NewDecoder(r).Decode(&dto)
 	if err != nil {
-		return &dto, err
+		return &dto, fmt.Errorf("decode entry create dto: %w", err)
 	}
 
-	if len(dto.Name) < 1 || len(dto.Email) < 1 || len(dto.Password) < 6 {
-		return &dto, ErrNotValidRequest
+	if len(dto.Name) < 1 {
+		return &dto, createError(dto, ErrEmptyName)
+	}
+
+	if len(dto.Email) < 1 {
+		return &dto, createError(dto, ErrEmptyEmail)
+	}
+
+	if len(dto.Password) < 1 {
+		return &dto, createError(dto, ErrEmptyPassword)
 	}
 
 	_, err = mail.ParseAddress(dto.Email)
 	if err != nil {
-		return &dto, ErrEmailNotValid
+		return &dto, createError(dto, err)
 	}
 
 	return &dto, nil
@@ -77,17 +89,24 @@ func NewEntryUpdateDto(r io.Reader) (*EntryUpdateDto, error) {
 	var dto EntryUpdateDto
 	err := json.NewDecoder(r).Decode(&dto)
 	if err != nil {
-		return &dto, err
+		return &dto, fmt.Errorf("decode entry update dto %w", err)
 	}
 
-	if len(dto.Name) < 1 || len(dto.Email) < 1 {
-		return &dto, ErrNotValidRequest
+	if len(dto.Name) < 1 {
+		return &dto, createError(dto, ErrEmptyName)
+	}
+	if len(dto.Email) < 1 {
+		return &dto, createError(dto, ErrEmptyEmail)
 	}
 
 	_, err = mail.ParseAddress(dto.Email)
 	if err != nil {
-		return &dto, ErrEmailNotValid
+		return &dto, createError(dto, err)
 	}
 
 	return &dto, nil
+}
+
+func createError(dto any, err error) error {
+	return fmt.Errorf("not valid dto - %T: %w", dto, err)
 }

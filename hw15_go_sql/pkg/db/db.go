@@ -27,6 +27,15 @@ func (d *Connect) NewTransaction() (*sqlx.Tx, error) {
 	return tx, err
 }
 
+func (d *Connect) IsErrDuplicate(err error) bool {
+	var pgErr pgx.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+
+	return false
+}
+
 func ProcessError(err error, msgError string) error {
 	pgErr, ok := err.(pgx.PgError)
 

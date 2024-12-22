@@ -21,16 +21,16 @@ func (r *RepoUser) Add(dto *EntryCreateDto) (int, error) {
 	query := "INSERT INTO users (name, email, password) VALUES (:name, :email, :password) RETURNING id"
 	stmt, err := r.db.Connect.PrepareNamed(query)
 	if err != nil {
-		wrappedErr := fmt.Errorf("can't do prepare query user {%s, %s, %s} error: %w", dto.Name, dto.Email, dto.Password, err)
-		return 0, wrappedErr
+		return 0, fmt.Errorf("prepare query: %w", err)
 	}
 
 	var id int
 	err = stmt.Get(&id, dto)
 	if err != nil {
-		msgErr := fmt.Sprintf("can't do insert user {%s, %s, %s}", dto.Name, dto.Email, dto.Password)
-		err = db.ProcessError(err, msgErr)
-		return 0, err
+		if r.db.IsErrDuplicate(err) {
+			return 0, fmt.Errorf("already exist user{%s, %s}: %w", dto.Name, dto.Email, errors.Join(db.ErrDBDuplicateKey, err))
+		}
+		return 0, fmt.Errorf("sql insert user{%s, %s}: %w", dto.Name, dto.Email, err)
 	}
 
 	return id, nil
@@ -41,10 +41,10 @@ func (r *RepoUser) GetByID(id int) (User, error) {
 
 	err := r.db.Connect.QueryRowx("SELECT id, name, email, password FROM users WHERE id=$1", id).StructScan(&user)
 	if errors.Is(err, sql.ErrNoRows) {
-		return user, db.ErrDBNotFound
+		return user, fmt.Errorf("not found user by id {%d}: %w", id, errors.Join(db.ErrDBNotFound, err))
 	}
 	if err != nil {
-		wrappedErr := fmt.Errorf("can't do select user by id {%d} error: %w", id, err)
+		wrappedErr := fmt.Errorf("sql select user by id {%d}: %w", id, err)
 		return user, wrappedErr
 	}
 
@@ -52,25 +52,24 @@ func (r *RepoUser) GetByID(id int) (User, error) {
 }
 
 func (r *RepoUser) Update(id int, dto *EntryUpdateDto) error {
-	msgErr := fmt.Sprintf("can't do prepare update user {%s, %s}", dto.Name, dto.Email)
-
 	result, err := r.db.Connect.NamedExec("UPDATE users SET name=:name, email=:email WHERE id=:id", struct {
 		ID    int
 		Name  string
 		Email string
 	}{ID: id, Name: dto.Name, Email: dto.Email})
 	if err != nil {
-		err = db.ProcessError(err, msgErr)
-		return err
+		if r.db.IsErrDuplicate(err) {
+			return fmt.Errorf("already exist user {%d, %s, %s}: %w", id, dto.Name, dto.Email, errors.Join(db.ErrDBDuplicateKey, err))
+		}
+		return fmt.Errorf("update user{%d, %s, %s}: %w", id, dto.Name, dto.Email, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		err = db.ProcessError(err, msgErr)
-		return err
+		return fmt.Errorf("rows affected user {%d}: %w", id, err)
 	}
 	if rowsAffected == 0 {
-		return db.ErrDBNotFound
+		return fmt.Errorf("update user {%d}: %w", id, db.ErrDBNotFound)
 	}
 
 	return nil

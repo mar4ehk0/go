@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,30 +26,31 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to create user: %w"
+
 	dto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	user, err := h.userService.Create(dto)
 	if err != nil {
-		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponseError(w, "Already exist user", http.StatusConflict, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		if errors.Is(wrappedErr, db.ErrDBDuplicateKey) {
+			h.respService.CreateResponseError(w, "Already exist user", http.StatusConflict, wrappedErr)
 			return
 		}
 
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseCreateDto(user)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
@@ -56,27 +58,32 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to getbyid user: %w"
+
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	user, err := h.userService.GetByID(id)
 	if err != nil {
-		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		if errors.Is(wrappedErr, db.ErrDBNotFound) {
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, wrappedErr)
 			return
 		}
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseReadDto(user)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
@@ -84,33 +91,34 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateByID(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to updatedbyid user: %w"
+
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
-	dto, err := NewEntryUpdateDto(r.Body)
+	entryDto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
-	err = h.userService.UpdateByID(id, dto)
+	err = h.userService.UpdateByID(id, entryDto)
 	if err != nil {
-		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponseError(w, "Already exist user with same email", http.StatusConflict, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		if errors.Is(wrappedErr, db.ErrDBDuplicateKey) {
+			h.respService.CreateResponseError(w, "Already exist user with same email", http.StatusConflict, wrappedErr)
 			return
 		}
 
-		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
+		if errors.Is(wrappedErr, db.ErrDBNotFound) {
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, wrappedErr)
 			return
 		}
 

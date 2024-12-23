@@ -2,6 +2,7 @@ package product
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,30 +29,30 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to create product: %w"
 	dto, err := NewEntryDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValid) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	product, err := h.productService.Create(dto)
 	if err != nil {
+		wrappedErr := fmt.Errorf(msgErr, err)
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponseError(w, "Already exist product", http.StatusConflict, err)
+			h.respService.CreateResponseError(w, "Already exist product", http.StatusConflict, wrappedErr)
 			return
 		}
 
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseCreateDto(product)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
@@ -59,27 +60,31 @@ func (h *Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to create product: %w"
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	product, err := h.productService.GetByID(id)
 	if err != nil {
+		wrappedErr := fmt.Errorf(msgErr, err)
 		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, wrappedErr)
 			return
 		}
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseReadDto(product)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
@@ -87,35 +92,35 @@ func (h *Handler) GetProductByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateProductByID(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to create update: %w"
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	dto, err := NewEntryDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValid) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	_, err = h.productService.Update(id, dto)
 	if err != nil {
+		wrappedErr := fmt.Errorf(msgErr, err)
 		if errors.Is(err, db.ErrDBDuplicateKey) {
-			h.respService.CreateResponseError(w, "Already exist product with same name", http.StatusConflict, err)
+			h.respService.CreateResponseError(w, "Already exist product with same name", http.StatusConflict, wrappedErr)
 			return
 		}
 		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, wrappedErr)
 			return
 		}
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 	}
 
 	h.respService.CreateResponseNoContent(w)

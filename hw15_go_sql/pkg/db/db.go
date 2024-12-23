@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/jackc/pgx"
 	"github.com/jmoiron/sqlx"
@@ -34,20 +33,4 @@ func (d *Connect) IsErrDuplicate(err error) bool {
 	}
 
 	return false
-}
-
-func ProcessError(err error, msgError string) error {
-	pgErr, ok := err.(pgx.PgError)
-
-	if ok {
-		switch pgErr.Code {
-		case "23505":
-			return ErrDBDuplicateKey
-		default:
-			wrappedErr := fmt.Errorf("%s error: %w", msgError, err)
-			return wrappedErr
-		}
-	}
-
-	return err
 }

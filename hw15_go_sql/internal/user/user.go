@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/mail"
+
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/helper"
 )
 
 var (
@@ -50,24 +52,24 @@ func NewEntryCreateDto(r io.Reader) (*EntryCreateDto, error) {
 
 	err := json.NewDecoder(r).Decode(&dto)
 	if err != nil {
-		return &dto, fmt.Errorf("decode entry create dto: %w", err)
+		return &dto, fmt.Errorf("decode user entry create dto: %w", err)
 	}
 
 	if len(dto.Name) < 1 {
-		return &dto, createError(dto, ErrEmptyName)
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyName)
 	}
 
 	if len(dto.Email) < 1 {
-		return &dto, createError(dto, ErrEmptyEmail)
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyEmail)
 	}
 
 	if len(dto.Password) < 1 {
-		return &dto, createError(dto, ErrEmptyPassword)
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyPassword)
 	}
 
 	_, err = mail.ParseAddress(dto.Email)
 	if err != nil {
-		return &dto, createError(dto, err)
+		return &dto, helper.CreateErrorForDto(dto, err)
 	}
 
 	return &dto, nil
@@ -93,20 +95,16 @@ func NewEntryUpdateDto(r io.Reader) (*EntryUpdateDto, error) {
 	}
 
 	if len(dto.Name) < 1 {
-		return &dto, createError(dto, ErrEmptyName)
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyName)
 	}
 	if len(dto.Email) < 1 {
-		return &dto, createError(dto, ErrEmptyEmail)
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyEmail)
 	}
 
 	_, err = mail.ParseAddress(dto.Email)
 	if err != nil {
-		return &dto, createError(dto, err)
+		return &dto, helper.CreateErrorForDto(dto, err)
 	}
 
 	return &dto, nil
-}
-
-func createError(dto any, err error) error {
-	return fmt.Errorf("not valid dto - %T: %w", dto, err)
 }

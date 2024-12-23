@@ -21,16 +21,17 @@ func (r *RepoProduct) Add(dto *EntryDto) (int, error) {
 	query := "INSERT INTO products (name, price) VALUES (:name, :price) RETURNING id"
 	stmt, err := r.db.Connect.PrepareNamed(query)
 	if err != nil {
-		wrappedErr := fmt.Errorf("can't do prepare query product {%s, %d} error: %w", dto.Name, dto.Price, err)
+		wrappedErr := fmt.Errorf("prepare query insert product {%v}: %w", dto, err)
 		return 0, wrappedErr
 	}
 
 	var id int
 	err = stmt.Get(&id, dto)
 	if err != nil {
-		msgErr := fmt.Sprintf("can't do insert product {%s, %d}", dto.Name, dto.Price)
-		err = db.ProcessError(err, msgErr)
-		return 0, err
+		if r.db.IsErrDuplicate(err) {
+			return 0, fmt.Errorf("already exist product{%v}: %w", dto, errors.Join(db.ErrDBDuplicateKey, err))
+		}
+		return 0, fmt.Errorf("sql insert product{%v}: %w", dto, err)
 	}
 
 	return id, nil
@@ -41,32 +42,30 @@ func (r *RepoProduct) GetByID(id int) (Product, error) {
 
 	err := r.db.Connect.QueryRowx("SELECT id, name, price FROM products WHERE id=$1", id).StructScan(&product)
 	if errors.Is(err, sql.ErrNoRows) {
-		return product, db.ErrDBNotFound
+		return product, fmt.Errorf("not found product {%d}: %w", id, db.ErrDBNotFound)
 	}
 	if err != nil {
-		wrappedErr := fmt.Errorf("can't do select product by id {%d} error: %w", id, err)
-		return product, wrappedErr
+		return product, fmt.Errorf("select product {%d}: %w", id, err)
 	}
 
 	return product, nil
 }
 
 func (r *RepoProduct) Update(product Product) error {
-	msgErr := fmt.Sprintf("can't do prepare update product {%s, %d}", product.Name, product.Price)
-
 	result, err := r.db.Connect.NamedExec("UPDATE products SET name=:name, price=:price WHERE id=:id", product)
 	if err != nil {
-		err = db.ProcessError(err, msgErr)
-		return err
+		if r.db.IsErrDuplicate(err) {
+			return fmt.Errorf("already exist product with same name {%v}: %w", product, errors.Join(db.ErrDBDuplicateKey, err))
+		}
+		return fmt.Errorf("sql update product{%v}: %w", product, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		err = db.ProcessError(err, msgErr)
-		return err
+		return fmt.Errorf("rows affected product {%v}: %w", product, err)
 	}
 	if rowsAffected == 0 {
-		return db.ErrDBNotFound
+		return fmt.Errorf("update product {%v}: %w", product, db.ErrDBNotFound)
 	}
 
 	return nil
@@ -75,7 +74,7 @@ func (r *RepoProduct) Update(product Product) error {
 func (r *RepoProduct) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) ([]Product, error) {
 	query, args, err := sqlx.In("SELECT id, name, price FROM products WHERE id IN (?);", productsID)
 	if err != nil {
-		return []Product{}, err
+		return []Product{}, fmt.Errorf("prepare sql select in for products {%v}: %w", productsID, err)
 	}
 
 	query = tx.Rebind(query)
@@ -84,14 +83,14 @@ func (r *RepoProduct) GetManyByProductsIDWithTx(tx *sqlx.Tx, productsID []int) (
 
 	rows, err := tx.Queryx(query, args...)
 	if err != nil {
-		return []Product{}, err
+		return []Product{}, fmt.Errorf("run sql select in for products {%v}: %w", productsID, err)
 	}
 
 	for rows.Next() {
 		var product Product
 		err = rows.StructScan(&product)
 		if err != nil {
-			return []Product{}, err
+			return []Product{}, fmt.Errorf("mapping product struct {%v}: %w", productsID, err)
 		}
 		products = append(products, product)
 	}
@@ -105,7 +104,7 @@ func (r *RepoProduct) GetManyByOrderIDWithTx(tx *sqlx.Tx, orderID int) ([]Produc
 	query := "SELECT id, name, price FROM products p JOIN orders_products op ON op.product_id = p.id WHERE op.order_id=$1"
 	err := tx.Select(&products, query, orderID)
 	if err != nil {
-		return []Product{}, err
+		return []Product{}, fmt.Errorf("select products {%d}: %w", orderID, err)
 	}
 
 	return products, nil

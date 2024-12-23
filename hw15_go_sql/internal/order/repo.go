@@ -32,13 +32,13 @@ func (r *RepoOrder) AddWithTx(
 		date,
 		totalAmount).Scan(&orderID)
 	if err != nil {
-		return 0, fmt.Errorf("failed to insert order: %w", err)
+		return 0, fmt.Errorf("insert order: %w", err)
 	}
 
 	for _, v := range products {
 		_, err = tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, v.ID)
 		if err != nil {
-			return 0, fmt.Errorf("failed to insert orders_products with order: %w", err)
+			return 0, fmt.Errorf("insert orders_products with order: %w", err)
 		}
 	}
 
@@ -49,7 +49,7 @@ func (r *RepoOrder) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
 	var order Order
 	err := tx.QueryRowx("SELECT id, user_id, order_date, total_amount FROM orders WHERE id=$1", id).StructScan(&order)
 	if err != nil {
-		return order, fmt.Errorf("failed to select order: %w", err)
+		return order, fmt.Errorf("select order id {%d}: %w", id, err)
 	}
 
 	if id != order.ID {
@@ -62,16 +62,16 @@ func (r *RepoOrder) GetByIDWithTx(tx *sqlx.Tx, id int) (Order, error) {
 func (r *RepoOrder) DeleteProductsByIDWithTx(tx *sqlx.Tx, orderID int) error {
 	res, err := tx.Exec("DELETE FROM orders_products WHERE order_id=$1", orderID)
 	if err != nil {
-		return fmt.Errorf("failed to exec delete orders_products: %w", err)
+		return fmt.Errorf("delete orders_products: %w", err)
 	}
 
 	count, err := res.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to rowsAffected delete orders_products: %w", err)
+		return fmt.Errorf("rows affected orders_products for order {%d}: %w", orderID, err)
 	}
 
 	if count == 0 {
-		return fmt.Errorf("failed to delete orders_products")
+		return fmt.Errorf("was not delete orders_products related with order {%d}", orderID)
 	}
 
 	return nil
@@ -81,7 +81,7 @@ func (r *RepoOrder) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID [
 	for _, productID := range productsID {
 		_, err := tx.Exec("INSERT INTO orders_products (order_id, product_id) VALUES ($1, $2)", orderID, productID)
 		if err != nil {
-			return fmt.Errorf("failed to insert orders_products: %w", err)
+			return fmt.Errorf("insert orders_products {%v} for order {%d}: %w", productsID, orderID, err)
 		}
 	}
 
@@ -91,7 +91,7 @@ func (r *RepoOrder) AddProductsByIDWithTx(tx *sqlx.Tx, orderID int, productsID [
 func (r *RepoOrder) UpdateTotalAmountOrderWithTX(tx *sqlx.Tx, orderID int, totalAmount int) error {
 	_, err := tx.Exec("UPDATE orders SET total_amount=$1 WHERE id=$2", totalAmount, orderID)
 	if err != nil {
-		return fmt.Errorf("failed to exec delete orders_products: %w", err)
+		return fmt.Errorf("updated order {%d}: %w", orderID, err)
 	}
 	return nil
 }

@@ -3,14 +3,19 @@ package order
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/product"
 	"github.com/mar4ehk0/go/hw15_go_sql/internal/user"
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/helper"
 )
 
-var ErrNotValidRequest = errors.New("not valid request")
+var (
+	ErrUserIDWrongValue = errors.New("userID wrong value")
+	ErrProductsIDEmpty  = errors.New("productsID empty")
+)
 
 type (
 	Order struct {
@@ -53,11 +58,15 @@ func NewEntryCreateDto(r io.Reader) (*EntryCreateDto, error) {
 	var dto EntryCreateDto
 	err := json.NewDecoder(r).Decode(&dto)
 	if err != nil {
-		return &dto, err
+		return &dto, fmt.Errorf("decode order entry create dto: %w", err)
 	}
 
-	if dto.UserID < 1 || len(dto.ProductsID) < 1 {
-		return &dto, ErrNotValidRequest
+	if dto.UserID < 1 {
+		return &dto, helper.CreateErrorForDto(dto, ErrUserIDWrongValue)
+	}
+
+	if len(dto.ProductsID) < 1 {
+		return &dto, helper.CreateErrorForDto(dto, ErrProductsIDEmpty)
 	}
 
 	return &dto, nil
@@ -82,7 +91,7 @@ func NewEntryUpdateDto(r io.Reader) (*EntryUpdateDto, error) {
 	}
 
 	if len(dto.ProductsID) < 1 {
-		return &dto, ErrNotValidRequest
+		return &dto, helper.CreateErrorForDto(dto, ErrProductsIDEmpty)
 	}
 
 	return &dto, nil

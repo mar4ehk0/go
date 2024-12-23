@@ -2,6 +2,7 @@ package order
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -25,53 +26,57 @@ func (h *Handler) InitializeRoutes(mux *http.ServeMux) {
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to create order: %w"
+
 	entryDto, err := NewEntryCreateDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	order, err := h.orderService.Create(entryDto)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseCreateDto(order)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
-		return
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 	}
 
 	h.respService.CreateResponseCreated(w, response)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to getbyid order: %w"
 	idRaw := r.PathValue("id")
 
 	id, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	outputDto, err := h.orderService.GetByID(id)
 	if err != nil {
-		if errors.Is(err, db.ErrDBNotFound) {
-			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		if errors.Is(wrappedErr, db.ErrDBNotFound) {
+			h.respService.CreateResponseError(w, "Not found", http.StatusNotFound, wrappedErr)
 			return
 		}
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
 	response, err := NewResponseReadDto(outputDto)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 
@@ -79,27 +84,27 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	msgErr := "failed to update order: %w"
 	idRaw := r.PathValue("id")
 
 	orderID, err := strconv.Atoi(idRaw)
 	if err != nil {
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	entryDto, err := NewEntryUpdateDto(r.Body)
 	if err != nil {
-		if errors.Is(err, ErrNotValidRequest) {
-			h.respService.CreateResponseError(w, "Not valid values", http.StatusBadRequest, err)
-			return
-		}
-		h.respService.CreateResponseError(w, err.Error(), http.StatusBadRequest, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, wrappedErr.Error(), http.StatusBadRequest, wrappedErr)
 		return
 	}
 
 	_, err = h.orderService.Update(orderID, entryDto)
 	if err != nil {
-		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, err)
+		wrappedErr := fmt.Errorf(msgErr, err)
+		h.respService.CreateResponseError(w, "Something went wrong", http.StatusInternalServerError, wrappedErr)
 		return
 	}
 

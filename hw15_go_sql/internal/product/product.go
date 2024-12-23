@@ -3,10 +3,16 @@ package product
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+
+	"github.com/mar4ehk0/go/hw15_go_sql/pkg/helper"
 )
 
-var ErrNotValid = errors.New("not valid request")
+var (
+	ErrEmptyName  = errors.New("empty name")
+	ErrEmptyPrice = errors.New("empty price")
+)
 
 type (
 	Product struct {
@@ -35,11 +41,14 @@ func NewEntryDto(r io.Reader) (*EntryDto, error) {
 	var dto EntryDto
 	err := json.NewDecoder(r).Decode(&dto)
 	if err != nil {
-		return &dto, err
+		return &dto, fmt.Errorf("decode product entry create dto: %w", err)
 	}
 
-	if len(dto.Name) < 1 || dto.Price < 1 {
-		return &dto, ErrNotValid
+	if len(dto.Name) < 1 {
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyName)
+	}
+	if dto.Price < 1 {
+		return &dto, helper.CreateErrorForDto(dto, ErrEmptyPrice)
 	}
 
 	return &dto, nil

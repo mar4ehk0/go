@@ -28,9 +28,9 @@ func (r *RepoUser) Add(dto *EntryCreateDto) (int, error) {
 	err = stmt.Get(&id, dto)
 	if err != nil {
 		if r.db.IsErrDuplicate(err) {
-			return 0, fmt.Errorf("already exist user{%s, %s}: %w", dto.Name, dto.Email, errors.Join(db.ErrDBDuplicateKey, err))
+			return 0, fmt.Errorf("already exist user{%v}: %w", dto, errors.Join(db.ErrDBDuplicateKey, err))
 		}
-		return 0, fmt.Errorf("sql insert user{%s, %s}: %w", dto.Name, dto.Email, err)
+		return 0, fmt.Errorf("sql insert user{%v}: %w", dto, err)
 	}
 
 	return id, nil
@@ -59,9 +59,9 @@ func (r *RepoUser) Update(id int, dto *EntryUpdateDto) error {
 	}{ID: id, Name: dto.Name, Email: dto.Email})
 	if err != nil {
 		if r.db.IsErrDuplicate(err) {
-			return fmt.Errorf("already exist user {%d, %s, %s}: %w", id, dto.Name, dto.Email, errors.Join(db.ErrDBDuplicateKey, err))
+			return fmt.Errorf("already exist user {%d, %v}: %w", id, dto, errors.Join(db.ErrDBDuplicateKey, err))
 		}
-		return fmt.Errorf("update user{%d, %s, %s}: %w", id, dto.Name, dto.Email, err)
+		return fmt.Errorf("update user{%d, %v}: %w", id, dto, err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
